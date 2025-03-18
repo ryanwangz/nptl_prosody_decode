@@ -91,126 +91,126 @@ class CNNSilenceDecoderSimple(nn.Module):
         x = x.view(x.size(0), -1)
         return self.fc(x)
 
+###LEGACY (see train_functions)
+# '''
+# Function that trains a decoder, prints progress of test accuracy
 
-'''
-Function that trains a decoder, prints progress of test accuracy
+# '''
+# def train_decoder_silence(neural_data, labels, decoder_class, window_size=5, stride=1, batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
+#     '''
+#     params:
+#     neural_data: 
+#     '''
+    
+#     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-'''
-def train_decoder_silence(neural_data, labels, decoder_class, window_size=5, stride=1, batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
-    '''
-    params:
-    neural_data: 
-    '''
+#     # Create windowed data
+#     X = create_windows(neural_data, window_size, stride)
     
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     #For labels, take the mode within each window
+#     y = np.zeros(X.shape[0])
+#     for i in range(X.shape[0]):
+#         start_idx = i * stride
+#         end_idx = start_idx + window_size
+#         y[i] = round(np.mean(labels[start_idx:end_idx])) #round should give mode for binary
+    
+#     # Split into train/test sets
+#     n_samples = len(X)
+#     n_train = int(train_split * n_samples)
+#     indices = np.random.permutation(n_samples)
+    
+#     #TODO: add train/test characterization (ie print distribution of labels, etc)
 
-    # Create windowed data
-    X = create_windows(neural_data, window_size, stride)
-    
-    #For labels, take the mode within each window
-    y = np.zeros(X.shape[0])
-    for i in range(X.shape[0]):
-        start_idx = i * stride
-        end_idx = start_idx + window_size
-        y[i] = round(np.mean(labels[start_idx:end_idx])) #round should give mode for binary
-    
-    # Split into train/test sets
-    n_samples = len(X)
-    n_train = int(train_split * n_samples)
-    indices = np.random.permutation(n_samples)
-    
-    #TODO: add train/test characterization (ie print distribution of labels, etc)
-
-    train_indices = indices[:n_train]
-    test_indices = indices[n_train:]
+#     train_indices = indices[:n_train]
+#     test_indices = indices[n_train:]
     
     
-    # X_train = torch.FloatTensor(X[train_indices]).to(device)
-    # y_train = torch.FloatTensor(y[train_indices]).to(device)
-    # X_test = torch.FloatTensor(X[test_indices]).to(device)
-    # y_test = torch.FloatTensor(y[test_indices]).to(device)
-    X_train = torch.FloatTensor(X[train_indices])
-    y_train = torch.FloatTensor(y[train_indices])
-    X_test = torch.FloatTensor(X[test_indices])
-    y_test = torch.FloatTensor(y[test_indices])
+#     # X_train = torch.FloatTensor(X[train_indices]).to(device)
+#     # y_train = torch.FloatTensor(y[train_indices]).to(device)
+#     # X_test = torch.FloatTensor(X[test_indices]).to(device)
+#     # y_test = torch.FloatTensor(y[test_indices]).to(device)
+#     X_train = torch.FloatTensor(X[train_indices])
+#     y_train = torch.FloatTensor(y[train_indices])
+#     X_test = torch.FloatTensor(X[test_indices])
+#     y_test = torch.FloatTensor(y[test_indices])
     
-    #Create data loaders
-    train_dataset = torch.utils.data.TensorDataset(X_train, y_train.unsqueeze(1))
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_dataset = torch.utils.data.TensorDataset(X_test, y_test.unsqueeze(1))
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    #Initialize model and optimizer
-    model = decoder_class(n_channels=neural_data.shape[1], window_size=window_size)
-    print(f"Model is {model.__class__.__name__}\n")
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) #TODO: do we want to use Adam
-    criterion = nn.BCELoss() #TODO: change this loss function from binary cross entrop
+#     #Create data loaders
+#     train_dataset = torch.utils.data.TensorDataset(X_train, y_train.unsqueeze(1))
+#     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+#     test_dataset = torch.utils.data.TensorDataset(X_test, y_test.unsqueeze(1))
+#     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+#     #Initialize model and optimizer
+#     model = decoder_class(n_channels=neural_data.shape[1], window_size=window_size)
+#     print(f"Model is {model.__class__.__name__}\n")
+#     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) #TODO: do we want to use Adam
+#     criterion = nn.BCELoss() #TODO: change this loss function from binary cross entrop
     
-    #traibn
-    for epoch in range(n_epochs):
-        model.train()
-        total_loss = 0
-        #TODO: xval
-        for batch_X, batch_y in train_loader:
-            optimizer.zero_grad()
-            outputs = model(batch_X)
-            loss = criterion(outputs, batch_y)
-            loss.backward()
-            optimizer.step()
-            total_loss += loss.item()
+#     #traibn
+#     for epoch in range(n_epochs):
+#         model.train()
+#         total_loss = 0
+#         #TODO: xval
+#         for batch_X, batch_y in train_loader:
+#             optimizer.zero_grad()
+#             outputs = model(batch_X)
+#             loss = criterion(outputs, batch_y)
+#             loss.backward()
+#             optimizer.step()
+#             total_loss += loss.item()
         
-        #eval
-        model.eval()
-        with torch.no_grad():
-            test_outputs = model(X_test)
-            test_loss = criterion(test_outputs, y_test.unsqueeze(1))
-            test_preds = (test_outputs > 0.5).float()
-            accuracy = (test_preds == y_test.unsqueeze(1)).float().mean()
+#         #eval
+#         model.eval()
+#         with torch.no_grad():
+#             test_outputs = model(X_test)
+#             test_loss = criterion(test_outputs, y_test.unsqueeze(1))
+#             test_preds = (test_outputs > 0.5).float()
+#             accuracy = (test_preds == y_test.unsqueeze(1)).float().mean()
         
-        print("Epoch {}/{}: Train Loss = {:.4f}, Test Loss = {:.4f}, Test Accuracy = {:.4f}".format(
-            epoch+1, n_epochs, total_loss/len(train_loader), test_loss.item(), accuracy.item()))
+#         print("Epoch {}/{}: Train Loss = {:.4f}, Test Loss = {:.4f}, Test Accuracy = {:.4f}".format(
+#             epoch+1, n_epochs, total_loss/len(train_loader), test_loss.item(), accuracy.item()))
     
-    print("Done training-- evaluation with test set:\n")
+#     print("Done training-- evaluation with test set:\n")
 
-    #confusion matrix stuff below
-    model.eval()
+#     #confusion matrix stuff below
+#     model.eval()
 
-    # Initialize lists to store predictions and labels
-    all_preds = []
-    all_labels = []
+#     # Initialize lists to store predictions and labels
+#     all_preds = []
+#     all_labels = []
 
-    # Get predictions for test set
-    with torch.no_grad():
-        for inputs, labels in test_loader:
-            # Move inputs and labels to the device
-            # inputs = inputs.to(device)
-            # labels = labels.to(device)
+#     # Get predictions for test set
+#     with torch.no_grad():
+#         for inputs, labels in test_loader:
+#             # Move inputs and labels to the device
+#             # inputs = inputs.to(device)
+#             # labels = labels.to(device)
 
-            # Get model outputs
-            outputs = model(inputs)
+#             # Get model outputs
+#             outputs = model(inputs)
 
-            # Convert outputs to binary predictions (assuming a threshold of 0.5)
-            predictions = (outputs >= 0.5).float()
+#             # Convert outputs to binary predictions (assuming a threshold of 0.5)
+#             predictions = (outputs >= 0.5).float()
 
-            # Append predictions and labels to the lists
-            all_preds.extend(predictions.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
+#             # Append predictions and labels to the lists
+#             all_preds.extend(predictions.cpu().numpy())
+#             all_labels.extend(labels.cpu().numpy())
 
-    # Calculate confusion matrix
-    conf_matrix = confusion_matrix(all_labels, all_preds)
+#     # Calculate confusion matrix
+#     conf_matrix = confusion_matrix(all_labels, all_preds)
 
-    # Save confusion matrix as a NumPy array
-    np.save('confusion_matrix.npy', conf_matrix)
-        # Optionally, plot and save the confusion matrix as an image
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues',
-                xticklabels=['No Silence', 'Silence'],
-                yticklabels=['No Silence', 'Silence'])
-    plt.title('Confusion Matrix')
-    plt.ylabel('True Label')
-    plt.xlabel('Predicted Label')
-    plt.savefig(f'/home/groups/henderj/rzwang/figures/confusion_matrix_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
-    plt.close()
-    return model
+#     # Save confusion matrix as a NumPy array
+#     np.save('confusion_matrix.npy', conf_matrix)
+#         # Optionally, plot and save the confusion matrix as an image
+#     plt.figure(figsize=(8, 6))
+#     sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues',
+#                 xticklabels=['No Silence', 'Silence'],
+#                 yticklabels=['No Silence', 'Silence'])
+#     plt.title('Confusion Matrix')
+#     plt.ylabel('True Label')
+#     plt.xlabel('Predicted Label')
+#     plt.savefig(f'/home/groups/henderj/rzwang/figures/confusion_matrix_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png')
+#     plt.close()
+#     return model
 
 def evaluate_model(model, neural_data, labels, window_size=5, stride=1):
     model.eval()
@@ -247,7 +247,8 @@ def main():
         os.makedirs(args.output_dir, exist_ok=True)
         neural_data = np.load("/home/groups/henderj/rzwang/processed_data_silence/neural_data_sbp.npy") #TODO: need to add other neural data
         labels = np.load("/home/groups/henderj/rzwang/processed_data_silence/labels.npy")
-        model = train_decoder_silence(neural_data, labels, DeepCNNDecoder, window_size = args.window_size, stride = args.stride, batch_size = args.batch_size,
+        trial_info = np.load("/home/groups/henderj/rzwang/processed_data_silence/trial_info.npy", allow_pickle=True)
+        model = train_decoder_silence(neural_data, labels, trial_info, DeepCNNDecoder, window_size = args.window_size, stride = args.stride, batch_size = args.batch_size,
                             n_epochs = args.n_epochs, learning_rate = args.learning_rate, train_split = args.train_split)
         
         model_path = os.path.join(args.output_dir, f'model_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pt')

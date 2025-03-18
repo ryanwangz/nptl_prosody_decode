@@ -394,6 +394,7 @@ def main():
         
         neural_data = np.load("/home/groups/henderj/rzwang/processed_data_phonemes/neural_data_sbp.npy")
         phoneme_labels = np.load("/home/groups/henderj/rzwang/processed_data_phonemes/labels.npy")
+        trial_info = np.load("/home/groups/henderj/rzwang/processed_data_phonemes/trial_info.npy")
         phoneme_labels = convert_labels_to_ascii(phoneme_labels)
         phoneme_to_category, category_to_idx = create_phoneme_mappings()
         
@@ -422,8 +423,9 @@ def main():
 
         #traiun
         model, test_neural_data, test_labels = train_phoneme_decoder(
-            neural_data=neural_data,
-            labels=labels,
+            neural_data,
+            labels,
+            trial_info,
             decoder_class=lambda n_channels, window_size: DeepCNNPhonemeDecoder(
                 n_channels=n_channels,
                 window_size=window_size,

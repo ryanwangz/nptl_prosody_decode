@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=nn_training
+#SBATCH --job-name=nn_vol
 #SBATCH --time=24:00:00
 #SBATCH --ntasks=1
 #SBATCH --mem=32GB
@@ -24,11 +24,11 @@ source /home/groups/henderj/rzwang/vscode_env/bin/activate
 mkdir -p logs
 
 # Run the training script with parameters
-python /home/groups/henderj/rzwang/code/test_script_decoding.py \
+python /home/groups/henderj/rzwang/code/volume_decoding.py \
     --window_size 5 \
     --stride 1 \
-    --batch_size 16 \
-    --n_epochs 2 \
-    --learning_rate 0.001 \
+    --batch_size 64 \
+    --n_epochs 50 \
+    --learning_rate 0.0001 \
     --train_split 0.8 \
     --output_dir /home/groups/henderj/rzwang/results

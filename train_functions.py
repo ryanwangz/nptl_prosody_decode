@@ -129,7 +129,7 @@ def create_windows_and_labels(neural_data, labels, window_size=5, stride=1):
 
 
 # training function for phoneme decoder
-def train_phoneme_decoder(neural_data, labels, decoder_class, window_size=5, stride=1, 
+def train_phoneme_decoder(neural_data, labels, trial_info, decoder_class, window_size=5, stride=1, 
                          batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
     """
     Train phoneme decoder
@@ -150,13 +150,53 @@ def train_phoneme_decoder(neural_data, labels, decoder_class, window_size=5, str
     )
     
     #TODO: fix this train and test split, xval
-    n_samples = len(windowed_data)
-    n_train = int(n_samples * train_split)
+    #extract trial idxs from trial_info
+
+    #previous (take train/test split at index)
+    # n_samples = len(windowed_data)
+    # n_train = int(n_samples * train_split)
+
+    # train_data = windowed_data[:n_train]
+    # train_labels = windowed_labels[:n_train]
+    # test_data = windowed_data[n_train:]
+    # test_labels = windowed_labels[n_train:]
+
+    #Random train/test split by trial (rounded)
+    # First, organize data by trials
+    trial_data = []
+    trial_labels = []
+    current_idx = 0
     
-    train_data = windowed_data[:n_train]
-    train_labels = windowed_labels[:n_train]
-    test_data = windowed_data[n_train:]
-    test_labels = windowed_labels[n_train:]
+    for trial in trial_info:
+        n_bins = trial['n_bins']
+        # Calculate how many windows we'll get from this trial
+        n_windows = (n_bins - window_size) // stride + 1
+        
+        trial_windows = windowed_data[current_idx:current_idx + n_windows]
+        trial_window_labels = windowed_labels[current_idx:current_idx + n_windows]
+        
+        trial_data.append(trial_windows)
+        trial_labels.append(trial_window_labels)
+        
+        current_idx += n_windows
+
+    # Convert to numpy arrays for easier handling
+    trial_data = np.array(trial_data)
+    trial_labels = np.array(trial_labels)
+    
+    # Generate random indices for train/test split
+    n_trials = len(trial_info)
+    n_train_trials = int(n_trials * train_split) #rounding here
+    trial_indices = np.random.permutation(n_trials)
+    train_trial_indices = trial_indices[:n_train_trials]
+    test_trial_indices = trial_indices[n_train_trials:]
+    
+    #Split the data
+    train_data = np.concatenate(trial_data[train_trial_indices])
+    train_labels = np.concatenate(trial_labels[train_trial_indices])
+    test_data = np.concatenate(trial_data[test_trial_indices])
+    test_labels = np.concatenate(trial_labels[test_trial_indices])
+
     #Calculate class weights to handle imbalance
     # unique_labels, label_counts = np.unique(train_labels, return_counts=True)
     total_samples = len(train_labels)
@@ -283,7 +323,7 @@ def train_phoneme_decoder(neural_data, labels, decoder_class, window_size=5, str
 Function that trains a decoder, prints progress of test accuracy
 
 '''
-def train_decoder_silence(neural_data, labels, decoder_class, window_size=5, stride=1, batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
+def train_decoder_silence(neural_data, labels, trial_info, decoder_class, window_size=5, stride=1, batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
     '''
     params:
     neural_data: 
@@ -301,25 +341,69 @@ def train_decoder_silence(neural_data, labels, decoder_class, window_size=5, str
         end_idx = start_idx + window_size
         y[i] = round(np.mean(labels[start_idx:end_idx])) #round should give mode for binary
     
-    # Split into train/test sets
-    n_samples = len(X)
-    n_train = int(train_split * n_samples)
-    indices = np.random.permutation(n_samples)
+    ### Previous split: random assignment
+    # # Split into train/test sets
+    # n_samples = len(X)
+    # n_train = int(train_split * n_samples)
+    # indices = np.random.permutation(n_samples)
     
-    #TODO: add train/test characterization (ie print distribution of labels, etc)
+    # #TODO: add train/test characterization (ie print distribution of labels, etc)
 
-    train_indices = indices[:n_train]
-    test_indices = indices[n_train:]
+    # train_indices = indices[:n_train]
+    # test_indices = indices[n_train:]
+
+    ###new split: assign by trial train/test
+
+    trial_data = []
+    trial_labels = []
+    current_idx = 0
+    
+    for trial in trial_info:
+        n_bins = trial['n_bins']
+        # Calculate how many windows we'll get from this trial
+        n_windows = (n_bins - window_size) // stride + 1
+        
+        trial_windows = X[current_idx:current_idx + n_windows]
+        trial_window_labels = y[current_idx:current_idx + n_windows]
+        
+        trial_data.append(trial_windows)
+        trial_labels.append(trial_window_labels)
+        
+        current_idx += n_windows
+
+    # Convert to numpy arrays for easier handling
+    trial_data = np.array(trial_data)
+    trial_labels = np.array(trial_labels)
+    
+    # Generate random indices for train/test split
+    n_trials = len(trial_info)
+    n_train_trials = int(n_trials * train_split) #rounding here
+    trial_indices = np.random.permutation(n_trials)
+    train_trial_indices = trial_indices[:n_train_trials]
+    test_trial_indices = trial_indices[n_train_trials:]
+    
+    #Split the data
+    train_data = np.concatenate(trial_data[train_trial_indices])
+    train_labels = np.concatenate(trial_labels[train_trial_indices])
+    test_data = np.concatenate(trial_data[test_trial_indices])
+    test_labels = np.concatenate(trial_labels[test_trial_indices])
+    
+
     
     
     # X_train = torch.FloatTensor(X[train_indices]).to(device)
     # y_train = torch.FloatTensor(y[train_indices]).to(device)
     # X_test = torch.FloatTensor(X[test_indices]).to(device)
     # y_test = torch.FloatTensor(y[test_indices]).to(device)
-    X_train = torch.FloatTensor(X[train_indices])
-    y_train = torch.FloatTensor(y[train_indices])
-    X_test = torch.FloatTensor(X[test_indices])
-    y_test = torch.FloatTensor(y[test_indices])
+    ### previous
+    # X_train = torch.FloatTensor(X[train_indices])
+    # y_train = torch.FloatTensor(y[train_indices])
+    # X_test = torch.FloatTensor(X[test_indices])
+    # y_test = torch.FloatTensor(y[test_indices])
+    X_train = torch.FloatTensor(train_data)
+    y_train = torch.FloatTensor(train_labels)
+    X_test = torch.FloatTensor(test_data)
+    y_test = torch.FloatTensor(test_labels)
     
     #Create data loaders
     train_dataset = torch.utils.data.TensorDataset(X_train, y_train.unsqueeze(1))

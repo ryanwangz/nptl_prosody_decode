@@ -196,7 +196,9 @@ def process_all_blocks(exp_dir, label_dir, output_dir, footer, padding=1):
                 'block_file': mat_file,
                 'audio_file': audio_file,
                 'trial_idx': trial_idx,
-                'n_bins': len(labels)
+                'n_bins': len(labels),
+                'trial_start_idx': trial_start_idx,
+                'trial_end_idx': trial_end_idx                
             })
     
     # Convert to arrays and save

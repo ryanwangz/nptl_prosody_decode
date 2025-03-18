@@ -10,12 +10,14 @@ import torch.nn.functional as F
 import torch.utils.data
 import os
 import logging
+import json
 from datetime import datetime
 # from torchsummary import summary
 from scipy import stats
 #some other ones: torchsummary, sklearn metrics, early stopping? seaborn/matplotlib
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import r2_score
 
 import matplotlib.pyplot as plt
 
@@ -62,7 +64,7 @@ class CNNVolumeDecoder(nn.Module):
         x = x.view(x.size(0), -1)
         return self.fc(x).squeeze()
 
-def train_volume_decoder(neural_data, labels, decoder_class, window_size=5, stride=1, 
+def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_size=5, stride=1, 
                         batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
     
     # Create windows (same as before)
@@ -70,14 +72,39 @@ def train_volume_decoder(neural_data, labels, decoder_class, window_size=5, stri
         neural_data, labels, window_size, stride
     )
     
-    # Split data (same as before)
-    n_samples = len(windowed_data)
-    n_train = int(n_samples * train_split)
+    trial_data = []
+    trial_labels = []
+    current_idx = 0
     
-    train_data = windowed_data[:n_train]
-    train_labels = windowed_labels[:n_train]
-    test_data = windowed_data[n_train:]
-    test_labels = windowed_labels[n_train:]
+    for trial in trial_info:
+        n_bins = trial['n_bins']
+        # Calculate how many windows we'll get from this trial
+        n_windows = (n_bins - window_size) // stride + 1
+        
+        trial_windows = windowed_data[current_idx:current_idx + n_windows]
+        trial_window_labels = windowed_labels[current_idx:current_idx + n_windows]
+        
+        trial_data.append(trial_windows)
+        trial_labels.append(trial_window_labels)
+        
+        current_idx += n_windows
+
+    # Convert to numpy arrays for easier handling
+    trial_data = np.array(trial_data)
+    trial_labels = np.array(trial_labels)
+    
+    # Generate random indices for train/test split
+    n_trials = len(trial_info)
+    n_train_trials = int(n_trials * train_split) #rounding here
+    trial_indices = np.random.permutation(n_trials)
+    train_trial_indices = trial_indices[:n_train_trials]
+    test_trial_indices = trial_indices[n_train_trials:]
+    
+    #Split the data
+    train_data = np.concatenate(trial_data[train_trial_indices])
+    train_labels = np.concatenate(trial_labels[train_trial_indices])
+    test_data = np.concatenate(trial_data[test_trial_indices])
+    test_labels = np.concatenate(trial_labels[test_trial_indices])
     
     # Create datasets with FloatTensor for both inputs and targets
     train_dataset = torch.utils.data.TensorDataset(
@@ -100,12 +127,13 @@ def train_volume_decoder(neural_data, labels, decoder_class, window_size=5, stri
     # Initialize model
     model = decoder_class(n_channels=neural_data.shape[1], window_size=window_size)
     
-    # Use MSE loss instead of CrossEntropyLoss
+    # Use MSE loss instead of CrossEntropyLoss for continuous
     criterion = nn.MSELoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.001)
-    scheduler = torch.optim.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
-
-    # Training loop
+    # scheduler = torch.optim.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=0.5, patience=5, verbose=True, min_lr=1e-6
+    )
     best_loss = float('inf')
     patience_counter = 0
     max_patience = 15
@@ -165,14 +193,157 @@ def train_volume_decoder(neural_data, labels, decoder_class, window_size=5, stri
             print(f"Early stopping triggered at epoch {epoch+1}")
             break
         
-        # Print epoch statistics
+        #Print epoch statistics
         print(f'Epoch: {epoch+1}/{n_epochs}')
-        print(f'Train Loss: {avg_train_loss:.4f} | Train MAE: {avg_train_mae:.4f}')
-        print(f'Test Loss: {avg_test_loss:.4f} | Test MAE: {avg_test_mae:.4f}')
+        print(f'Train Loss (MSE): {avg_train_loss:.4f} | Train MAE: {avg_train_mae:.4f}')
+        print(f'Test Loss (MSE): {avg_test_loss:.4f} | Test MAE: {avg_test_mae:.4f}')
         print('--------------------')
     
+    print(f'Saving test statistics \n')
+
     # Load best model
     model.load_state_dict(torch.load('best_model.pt'))
+    # make predictions on test set
+    predictions = decode_volume(
+        model=model,
+        test_data=test_data,
+        window_size=window_size,
+        stride=stride,
+        batch_size=batch_size
+    )
+    
+    #Calculate and log metrics
+    accuracy = np.mean(np.abs(predictions - test_labels)).item()
+    logging.info(f"Test MAE: {accuracy:.4f}")
+
+    #save a handful of trial plots here (maybe 3 best and 3 worst trials?)
+    
+    # Create directory for saving plots if it doesn't exist
+    plot_dir = f'/home/groups/henderj/rzwang/figures/volume_plots/vol_plot_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+
+    # Calculate error for each trial
+    trial_errors = []
+    trial_predictions = []
+    trial_actual = []
+    
+    current_idx = 0
+    for i, trial in enumerate(trial_info):
+        if i in test_trial_indices:  # Only evaluate test trials
+            n_bins = trial['n_bins']
+            n_windows = (n_bins - window_size) // stride + 1
+            
+            trial_pred = predictions[current_idx:current_idx + n_windows]
+            trial_true = test_labels[current_idx:current_idx + n_windows]
+            
+            # Calculate mean absolute error for this trial
+            trial_mae = np.mean(np.abs(trial_pred - trial_true))
+            
+            trial_errors.append({
+                'index': i,
+                'error': trial_mae,
+                'predictions': trial_pred,
+                'actual': trial_true,
+                'audio_file': trial['audio_file']
+            })
+            
+            current_idx += n_windows
+
+    # Sort trials by error
+    sorted_trials = sorted(trial_errors, key=lambda x: x['error'])
+    
+    # Plot best 3 and worst 3 trials
+    best_trials = sorted_trials[:3]
+    worst_trials = sorted_trials[-3:]
+    
+    def plot_trial(trial_data, title, filename):
+        plt.figure(figsize=(12, 6))
+        plt.plot(trial_data['actual'], label='Actual', color='blue', alpha=0.6)
+        plt.plot(trial_data['predictions'], label='Predicted', color='red', alpha=0.6)
+        plt.title(f"{title}\nMAE: {trial_data['error']:.4f}\nFile: {trial_data['audio_file']}")
+        plt.xlabel('Time (100ms bins?)')
+        plt.ylabel('Volume (db)')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.savefig(os.path.join(plot_dir, filename))
+        plt.close()
+
+    # Plot best trials
+    for i, trial in enumerate(best_trials):
+        plot_trial(
+            trial,
+            f'Best Trial #{i+1}',
+            f'best_trial_{i+1}.png'
+        )
+
+    # Plot worst trials
+    for i, trial in enumerate(worst_trials):
+        plot_trial(
+            trial,
+            f'Worst Trial #{i+1}',
+            f'worst_trial_{i+1}.png'
+        )
+
+    # Create summary plot
+    plt.figure(figsize=(15, 10))
+    
+    # Plot best trials
+    for i, trial in enumerate(best_trials):
+        plt.subplot(2, 3, i+1)
+        plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
+        plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        plt.title(f'Best #{i+1}\nMAE: {trial["error"]:.4f}')
+        plt.grid(True, alpha=0.3)
+        if i == 0:
+            plt.legend()
+    
+    # Plot worst trials
+    for i, trial in enumerate(worst_trials):
+        plt.subplot(2, 3, i+4)
+        plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
+        plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        plt.title(f'Worst #{i+1}\nMAE: {trial["error"]:.4f}')
+        plt.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, 'summary_plot.png'))
+    plt.close()
+
+    # Save trial statistics
+    trial_stats = {
+        'best_trials': [
+            {
+                'audio_file': trial['audio_file'],
+                'error': trial['error'],
+                'index': trial['index']
+            } for trial in best_trials
+        ],
+        'worst_trials': [
+            {
+                'audio_file': trial['audio_file'],
+                'error': trial['error'],
+                'index': trial['index']
+            } for trial in worst_trials
+        ],
+        'mean_error': np.mean([t['error'] for t in trial_errors]),
+        'std_error': np.std([t['error'] for t in trial_errors])
+    }
+
+    # Save trial statistics to JSON file
+    with open(os.path.join(plot_dir, 'trial_statistics.json'), 'w') as f:
+        json.dump(trial_stats, f, indent=4)
+
+    print(f"\nPlots and statistics saved to {plot_dir}/")
+    print("Best trials:")
+    for i, trial in enumerate(best_trials):
+        print(f"  {i+1}. File: {trial['audio_file']}, MAE: {trial['error']:.4f}")
+    print("\nWorst trials:")
+    for i, trial in enumerate(worst_trials):
+        print(f"  {i+1}. File: {trial['audio_file']}, MAE: {trial['error']:.4f}")
+    print(f"\nMean trial error: {trial_stats['mean_error']:.4f} ± {trial_stats['std_error']:.4f}")
+
+
     return model, test_data, test_labels
 
 
@@ -239,13 +410,15 @@ def main():
         os.makedirs(args.output_dir, exist_ok=True)
         
         # Load data
-        neural_data = np.load("/home/groups/henderj/rzwang/processed_data_volume/neural_data_sbp.npy")
-        volume_labels = np.load("/home/groups/henderj/rzwang/processed_data_volume/labels_normalized.npy")
+        neural_data = np.load("/home/groups/henderj/rzwang/processed_data_db/neural_data_sbp.npy")
+        volume_labels = np.load("/home/groups/henderj/rzwang/processed_data_db/labels_normalized.npy")
+        trial_info = np.load("/home/groups/henderj/rzwang/processed_data_db/trial_info.npy", allow_pickle=True)
         
         # Train model
         model, test_neural_data, test_labels = train_volume_decoder(
             neural_data=neural_data,
             labels=volume_labels,
+            trial_info=trial_info,
             decoder_class=CNNVolumeDecoder,
             window_size=args.window_size,
             stride=args.stride,
