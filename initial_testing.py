@@ -143,7 +143,6 @@ def train_decoder(neural_data, labels, decoder_class, window_size=5, stride=1, b
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) #TODO: do we want to use Adam
     criterion = nn.BCELoss() #TODO: change this loss function from binary cross entrop
     
-    # Training loop
     for epoch in range(n_epochs):
         model.train()
         total_loss = 0

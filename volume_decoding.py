@@ -89,11 +89,10 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
         
         current_idx += n_windows
 
-    # Convert to numpy arrays for easier handling
     trial_data = np.array(trial_data)
     trial_labels = np.array(trial_labels)
     
-    # Generate random indices for train/test split
+    # Generate rdm indices for train/test split
     n_trials = len(trial_info)
     n_train_trials = int(n_trials * train_split) #rounding here
     trial_indices = np.random.permutation(n_trials)
@@ -105,8 +104,6 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     train_labels = np.concatenate(trial_labels[train_trial_indices])
     test_data = np.concatenate(trial_data[test_trial_indices])
     test_labels = np.concatenate(trial_labels[test_trial_indices])
-    
-    # Create datasets with FloatTensor for both inputs and targets
     train_dataset = torch.utils.data.TensorDataset(
         torch.FloatTensor(train_data),
         torch.FloatTensor(train_labels)  # Changed from LongTensor
@@ -118,18 +115,18 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     
     # Create data loaders (same as before)
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True
+        train_dataset, batch_size=batch_size, shuffle=False # Do we want to shuffle data here?
     )
     test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=False
     )
     
-    # Initialize model
+    # Init
     model = decoder_class(n_channels=neural_data.shape[1], window_size=window_size)
     
     # Use MSE loss instead of CrossEntropyLoss for continuous
     criterion = nn.MSELoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.001)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.001) # may want to switch back to Adam (remnant of phoneme decoder)
     # scheduler = torch.optim.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', factor=0.5, patience=5, verbose=True, min_lr=1e-6
@@ -142,14 +139,14 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     for epoch in range(n_epochs):
         model.train()
         train_loss = 0
-        train_mae = 0  # Mean Absolute Error
+        train_mae = 0  #Mean Absolute Error
         
         for batch_data, batch_labels in train_loader:
             # Forward pass
             outputs = model(batch_data)
             loss = criterion(outputs, batch_labels)
             
-            # Backward pass and optimize
+            # Backward pass and optimize (syntax from GPT bc it was giving me issues)
             optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -236,8 +233,6 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
             
             trial_pred = predictions[current_idx:current_idx + n_windows]
             trial_true = test_labels[current_idx:current_idx + n_windows]
-            
-            # Calculate mean absolute error for this trial
             trial_mae = np.mean(np.abs(trial_pred - trial_true))
             
             trial_errors.append({
@@ -269,15 +264,12 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
         plt.savefig(os.path.join(plot_dir, filename))
         plt.close()
 
-    # Plot best trials
     for i, trial in enumerate(best_trials):
         plot_trial(
             trial,
             f'Best Trial #{i+1}',
             f'best_trial_{i+1}.png'
         )
-
-    # Plot worst trials
     for i, trial in enumerate(worst_trials):
         plot_trial(
             trial,
@@ -287,8 +279,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
 
     # Create summary plot
     plt.figure(figsize=(15, 10))
-    
-    # Plot best trials
+    # figures
     for i, trial in enumerate(best_trials):
         plt.subplot(2, 3, i+1)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
@@ -297,8 +288,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
         plt.grid(True, alpha=0.3)
         if i == 0:
             plt.legend()
-    
-    # Plot worst trials
+
     for i, trial in enumerate(worst_trials):
         plt.subplot(2, 3, i+4)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
@@ -310,7 +300,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     plt.savefig(os.path.join(plot_dir, 'summary_plot.png'))
     plt.close()
 
-    # Save trial statistics
+    # Save trial statistics 
     trial_stats = {
         'best_trials': [
             {
@@ -330,7 +320,6 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
         'std_error': np.std([t['error'] for t in trial_errors])
     }
 
-    # Save trial statistics to JSON file
     with open(os.path.join(plot_dir, 'trial_statistics.json'), 'w') as f:
         json.dump(trial_stats, f, indent=4)
 
@@ -348,30 +337,9 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
 
 
 def decode_volume(model, test_data, window_size=5, stride=1, batch_size=32):
-    """
-    Decode volume using trained model
-    
-    Parameters:
-    -----------
-    model : torch.nn.Module
-        Trained neural network model
-    test_data : np.ndarray
-        Neural data to decode (n_timepoints, n_channels)
-    window_size : int
-        Size of sliding window
-    stride : int
-        Stride for sliding window
-    batch_size : int
-        Batch size for processing
-        
-    Returns:
-    --------
-    predictions : np.ndarray
-        Predicted volume values for each time window
-    """
     
     model.eval()
-    windowed_data = test_data  # Assuming test_data is already windowed
+    windowed_data = test_data  #assuming test_data is already windowed
     
     # Convert to torch tensor
     test_dataset = torch.FloatTensor(windowed_data)
@@ -408,13 +376,11 @@ def main():
         logging.info(f"Starting volume decoding training with parameters: {vars(args)}")
 
         os.makedirs(args.output_dir, exist_ok=True)
-        
-        # Load data
         neural_data = np.load("/home/groups/henderj/rzwang/processed_data_db/neural_data_sbp.npy")
         volume_labels = np.load("/home/groups/henderj/rzwang/processed_data_db/labels_normalized.npy")
         trial_info = np.load("/home/groups/henderj/rzwang/processed_data_db/trial_info.npy", allow_pickle=True)
         
-        # Train model
+        #train
         model, test_neural_data, test_labels = train_volume_decoder(
             neural_data=neural_data,
             labels=volume_labels,
@@ -427,11 +393,9 @@ def main():
             learning_rate=args.learning_rate
         )
 
-        # Save model
+        #save
         model_path = os.path.join(args.output_dir, f'volume_model_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pt')
         torch.save(model.state_dict(), model_path)
-        
-        # Make predictions on test set
         predictions = decode_volume(
             model=model,
             test_data=test_neural_data,

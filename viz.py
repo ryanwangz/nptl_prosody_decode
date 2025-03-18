@@ -2,7 +2,7 @@
 import numpy as np
 from collections import Counter
 
-# Load the labels
+#for looking at phoneme data
 labels = np.load('/home/groups/henderj/rzwang/processed_data_phonemes/labels.npy')
 
 # Basic information

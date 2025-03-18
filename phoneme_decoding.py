@@ -310,29 +310,7 @@ class CNNPhonemeDecoder(nn.Module):
 
 
 def decode_phonemes(model, test_data, window_size=5, stride=1, batch_size=32, device='cuda'):
-    """
-    Decode phonemes using trained model
-    
-    params:
-    model : torch.nn.Module
-        Trained neural network model
-    test_data : np.ndarray
-        Neural data to decode (n_timepoints, n_channels)
-    window_size : int
-        Size of sliding window
-    stride : int
-        Stride for sliding window
-    batch_size : int
-        Batch size for processing
-    device : str
-        Device to run model on ('cuda' or 'cpu')
-        
-    output:
-    predictions : np.ndarray
-        Predicted phoneme indices for each time window
-    probabilities : np.ndarray
-        Probability distributions over phonemes for each window
-    """
+    ## Test data is assumed to be windowed already
     
     # Prepare model for evaluation
     model.eval()

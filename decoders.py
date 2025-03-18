@@ -1,6 +1,6 @@
-#decoder architectures from some papers: (TODO: insert architectures from Wairgarkar paper here)
+#decoder architectures from some papers: (TODO: insert architectures from Wairgarkar, Willsey paper here)
 
-#also TODO: add soft-dtw and similar loss functions
+#also TODO: add soft-dtw and similar loss functions for volume and pitch decoders
 
 import torch
 import numpy as np
@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
 #takes both spike band power and threshold crossings channels (requires training funciton tweaks)
-class DualStreamCNN(nn.Module):
+class DualStreamCNN(nn.Module): #(from gpt)
     def __init__(self, n_channels_sbp, n_channels_tc, n_outputs):
         super(DualStreamCNN, self).__init__()
         

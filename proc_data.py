@@ -90,7 +90,7 @@ def convert_txt_to_npy(input_dir, output_dir):
         min_length = min(min(len(x) for x in all_pitch_data), 
                         min(len(x) for x in all_intensity_data))
         
-        # Trim all arrays to minimum length and stack
+        #  Trim all arrays
         pitch_array = np.vstack([x[:min_length] for x in all_pitch_data])
         intensity_array = np.vstack([x[:min_length] for x in all_intensity_data])
         

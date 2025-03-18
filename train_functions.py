@@ -180,11 +180,11 @@ def train_phoneme_decoder(neural_data, labels, trial_info, decoder_class, window
         
         current_idx += n_windows
 
-    # Convert to numpy arrays for easier handling
+    # Convert to numpy
     trial_data = np.array(trial_data)
     trial_labels = np.array(trial_labels)
     
-    # Generate random indices for train/test split
+    #changed to trial indices here (from random)
     n_trials = len(trial_info)
     n_train_trials = int(n_trials * train_split) #rounding here
     trial_indices = np.random.permutation(n_trials)
@@ -370,19 +370,17 @@ def train_decoder_silence(neural_data, labels, trial_info, decoder_class, window
         trial_labels.append(trial_window_labels)
         
         current_idx += n_windows
-
-    # Convert to numpy arrays for easier handling
     trial_data = np.array(trial_data)
     trial_labels = np.array(trial_labels)
     
-    # Generate random indices for train/test split
+    #changed to trial indices here (from random)
     n_trials = len(trial_info)
     n_train_trials = int(n_trials * train_split) #rounding here
     trial_indices = np.random.permutation(n_trials)
     train_trial_indices = trial_indices[:n_train_trials]
     test_trial_indices = trial_indices[n_train_trials:]
     
-    #Split the data
+
     train_data = np.concatenate(trial_data[train_trial_indices])
     train_labels = np.concatenate(trial_labels[train_trial_indices])
     test_data = np.concatenate(trial_data[test_trial_indices])
@@ -452,11 +450,9 @@ def train_decoder_silence(neural_data, labels, trial_info, decoder_class, window
     # Get predictions for test set
     with torch.no_grad():
         for inputs, labels in test_loader:
-            # Move inputs and labels to the device
+            # Move inputs and labels to the device (not working with Sherlock at the moment)
             # inputs = inputs.to(device)
             # labels = labels.to(device)
-
-            # Get model outputs
             outputs = model(inputs)
 
             # Convert outputs to binary predictions (assuming a threshold of 0.5)
@@ -466,7 +462,7 @@ def train_decoder_silence(neural_data, labels, trial_info, decoder_class, window
             all_preds.extend(predictions.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
-    # Calculate confusion matrix
+    #calculate confusion matrix
     conf_matrix = confusion_matrix(all_labels, all_preds)
 
     # Save confusion matrix as a NumPy array

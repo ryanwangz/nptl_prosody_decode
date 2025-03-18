@@ -28,23 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def load_and_evaluate_model(model_path, test_data_in, test_labels_in, window_size=5, batch_size=32):
-    """
-    Load saved model and evaluate it
-    
-    Parameters:
-    -----------
-    model_path : str
-        Path to the saved .pt model file
-    test_data : numpy.ndarray
-        Neural test data
-    test_labels : numpy.ndarray
-        Test labels
-    window_size : int
-        Size of the window used in training
-    batch_size : int
-        Batch size for evaluation
-    """
-    # Set device
+    #Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     windowed_test_data = create_windows(test_data_in, window_size)
@@ -59,7 +43,7 @@ def load_and_evaluate_model(model_path, test_data_in, test_labels_in, window_siz
     model.load_state_dict(torch.load(model_path))
     model = model.to(device)
 
-    # Evaluate
+    #
     model.eval()
     all_preds = []
     all_labels = []
@@ -79,7 +63,7 @@ def load_and_evaluate_model(model_path, test_data_in, test_labels_in, window_siz
     all_preds = np.array(all_preds)
     all_labels = np.array(all_labels)
     
-    # Calculate confusion matrix
+    #Calculate confusion matrix
     conf_matrix = confusion_matrix(all_labels, all_preds)
     all_preds = all_preds.squeeze()
     accuracy = (all_preds == all_labels).mean()
@@ -118,7 +102,6 @@ def plot_confusion_matix_cat(conf_matrix):
 
 labels = np.array([category_to_idx[phoneme_to_category[label]] for label in phoneme_labels])
 
-# Assuming you have your test data and labels ready
 model_path = '/home/groups/henderj/rzwang/results/model_20250314_015616.pt' 
 test_data = np.load("/home/groups/henderj/rzwang/processed_data_silence/neural_data_sbp.npy") 
 test_labels = np.load("/home/groups/henderj/rzwang/processed_data_silence/labels.npy") # Your test labels
