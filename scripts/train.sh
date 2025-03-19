@@ -11,7 +11,7 @@
 # SBATCH --gres=gpu:1
 # Load necessary modules
 module load python/3.9.0
-module load cuda/11.7.0
+module load cuda/11.7.1
 ml cudnn/8.6.0.163
 ml gcc/10.1.0
 ml ffmpeg

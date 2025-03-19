@@ -83,7 +83,7 @@ def create_label_windows(labels, window_size, stride=1):
 
 #     #now train the decoder
 
-def create_windows_and_labels(neural_data, labels, window_size=5, stride=1):
+def create_windows_and_labels_mode(neural_data, labels, window_size=5, stride=1):
     """Create sliding windows from data and corresponding label modes
     
     Parameters:
@@ -128,6 +128,51 @@ def create_windows_and_labels(neural_data, labels, window_size=5, stride=1):
     return windows, window_labels
 
 
+
+def create_windows_and_labels_mean(neural_data, labels, window_size=5, stride=1):
+    """Create sliding windows from data and corresponding label means
+    
+    Parameters:
+    -----------
+    neural_data : np.ndarray
+        Neural data (n_timepoints, n_channels)
+    labels : np.ndarray
+        Phoneme labels (n_timepoints,)
+    window_size : int
+        Size of sliding window
+    stride : int
+        Stride for sliding window
+        
+    Returns:
+    --------
+    windows : np.ndarray
+        Windowed neural data (n_windows, n_channels, window_size)
+    window_labels : np.ndarray
+        Mode of labels for each window
+    """
+    n_timepoints, n_channels = neural_data.shape
+    n_windows = ((n_timepoints - window_size) // stride) + 1
+    
+    # Create windows for neural data
+    windows = np.zeros((n_windows, n_channels, window_size))
+    window_labels = np.zeros(n_windows, dtype=labels.dtype)
+    
+    for i in range(n_windows):
+        start_idx = i * stride
+        end_idx = start_idx + window_size
+        
+        # Window the neural data
+        windows[i] = neural_data[start_idx:end_idx].T
+        
+        # Get mean of labels in this window
+        try:
+            # For newer scipy versions
+            window_labels[i] = np.squeeze(np.mean(labels[start_idx:end_idx], keepdims=True))
+        except TypeError:
+            # For older scipy versions
+            window_labels[i] = np.squeeze(np.mean(labels[start_idx:end_idx]))
+    return windows, window_labels
+
 # training function for phoneme decoder
 def train_phoneme_decoder(neural_data, labels, trial_info, decoder_class, window_size=5, stride=1, 
                          batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
@@ -145,7 +190,7 @@ def train_phoneme_decoder(neural_data, labels, trial_info, decoder_class, window
     # Create windows
     # windowed_data = create_windows(neural_data, window_size, stride)
     # windowed_labels = labels[window_size-1::stride]  # align labels with windows
-    windowed_data, windowed_labels = create_windows_and_labels(
+    windowed_data, windowed_labels = create_windows_and_labels_mode(
         neural_data, labels, window_size, stride
     )
     

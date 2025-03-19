@@ -106,7 +106,7 @@ def convert_txt_to_npy(input_dir, output_dir):
 
 
 #TODO: add the theshold crossings, as this code only has the neural spike band power
-def process_all_blocks(exp_dir, label_dir, output_dir, footer, padding=1):
+def process_all_blocks(exp_dir, label_dir, output_dir, footer, padding=1, del_sil=False):
     """
     Process all blocks in directory and save aligned data as .npy files. Should overwrite existing label files in the folder (if any)
     Assumes padding should have 1s (indicating Silence)
@@ -121,10 +121,14 @@ def process_all_blocks(exp_dir, label_dir, output_dir, footer, padding=1):
     footer : str
         file label footer (vs .wav file)
         for example, if a.wav has labels a_lbl.npy, this string would be "_lbl.npy"
+    del_sil : bool
+        delete silence?
+    sil_lbls : str
+        filepath to the silence labels if silence needs to be deleted from labels
     """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    
+
     all_neural_data = []
     all_neural_data_tc = []
     all_labels = []
@@ -178,28 +182,65 @@ def process_all_blocks(exp_dir, label_dir, output_dir, footer, padding=1):
             n_neural_bins = trial_neural.shape[0] #should be the same for tc and sbp
             n_label_bins = len(labels)
             
+
+            
+            # else: # don't delete silences, but still need to add padding
             if n_neural_bins > n_label_bins:
                 labels = np.pad(labels, (0, n_neural_bins - n_label_bins),
-                              mode='constant', constant_values=padding)
+                            mode='constant', constant_values=padding)
             else:
                 labels = labels[:n_neural_bins]
                 trial_neural = trial_neural[:n_label_bins]
                 trial_neural_tc = trial_neural_tc[:n_label_bins]
             
+            # if del_sil:
+            #     #silence labels for this trial
+            #     trial_silence = silence_labels[trial_start_idx:trial_end_idx]
+            #     if len(trial_silence) < len(trial_neural):
+            #         trial_silence = np.pad(trial_silence, (0, len(trial_neural) - len(trial_silence)),
+            #                              mode='constant', constant_values=1)
+            #     else:
+            #         trial_silence = trial_silence[:len(trial_neural)]
+            #     # mask for non-silent bins
+            #     non_silence_mask = (trial_silence == 0)
+
+            #     # Apply mask, remove silent bins
+            #     trial_neural = trial_neural[non_silence_mask]
+            #     trial_neural_tc = trial_neural_tc[non_silence_mask]
+            #     labels = labels[non_silence_mask]
+
+            if del_sil:
+                # Create mask for non-zero labels
+                non_zero_mask = (labels != 0)
+                
+                # Store original length
+                original_length = len(labels)
+                # Apply mask to remove bins where labels are 0
+                trial_neural = trial_neural[non_zero_mask]
+                trial_neural_tc = trial_neural_tc[non_zero_mask]
+                labels = labels[non_zero_mask]
             # Store aligned data
             all_neural_data.append(trial_neural)
             all_neural_data_tc.append(trial_neural_tc)
             all_labels.append(labels)
             
             # Store trial metadata
-            trial_info.append({
+            trial_info_dict = {
                 'block_file': mat_file,
                 'audio_file': audio_file,
                 'trial_idx': trial_idx,
                 'n_bins': len(labels),
                 'trial_start_idx': trial_start_idx,
                 'trial_end_idx': trial_end_idx                
-            })
+            }
+            if del_sil:
+                trial_info_dict.update({
+                    'n_bins_original': original_length,
+                    'n_bins_non_silence': np.sum(non_zero_mask),
+                    'non_silence_mask': non_zero_mask.tolist()  # Store mask for reference
+                })
+
+            trial_info.append(trial_info_dict)
     
     # Convert to arrays and save
     neural_data_array = np.concatenate(all_neural_data, axis=0)
@@ -308,9 +349,9 @@ if __name__ == "__main__":
     
     label_dir = "/home/groups/henderj/rzwang/labels_hz_db_npys"
     exp_dir = "/home/groups/henderj/rzwang/blocks/t12-02-20-2025"
-    output_dir = "/home/groups/henderj/rzwang/processed_data_hz"
+    output_dir = "/home/groups/henderj/rzwang/processed_data_hz_no_sil"
 
-    process_all_blocks(exp_dir, label_dir, output_dir, "_intensity.npy", padding=0)
+    process_all_blocks(exp_dir, label_dir, output_dir, "_pitch.npy", padding=0, del_sil=True)
 
     #### general template for making categorical labels
     # label_dir = "/home/groups/henderj/rzwang/labels_hz_db_npys"

@@ -1,0 +1,30 @@
+Lmod has detected the following error: The following module(s) are unknown:
+"cuda/11.7.0"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore_cache load "cuda/11.7.0"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+/home/groups/henderj/rzwang/code/volume_decoding.py:95: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+  trial_data = np.array(trial_data)
+/home/groups/henderj/rzwang/code/volume_decoding.py:96: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+  trial_labels = np.array(trial_labels)
+Traceback (most recent call last):
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 485, in <module>
+    main()
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 471, in main
+    raise e
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 399, in main
+    learning_rate=args.learning_rate
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 205, in train_volume_decoder
+    model.load_state_dict(torch.load('best_model.pt'))
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/serialization.py", line 608, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/serialization.py", line 777, in _legacy_load
+    magic_number = pickle_module.load(f, **pickle_load_args)
+EOFError: Ran out of input

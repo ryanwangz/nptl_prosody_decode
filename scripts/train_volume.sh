@@ -11,7 +11,7 @@
 # SBATCH --gres=gpu:1
 # Load necessary modules
 module load python/3.9.0
-module load cuda/11.7.0
+module load cuda/11.7.1
 ml cudnn/8.6.0.163
 ml gcc/10.1.0
 ml ffmpeg
@@ -25,10 +25,10 @@ mkdir -p logs
 
 # Run the training script with parameters
 python /home/groups/henderj/rzwang/code/volume_decoding.py \
-    --window_size 5 \
+    --window_size 20 \
     --stride 1 \
     --batch_size 64 \
-    --n_epochs 50 \
+    --n_epochs 2 \
     --learning_rate 0.0001 \
     --train_split 0.8 \
     --output_dir /home/groups/henderj/rzwang/results
