@@ -1,0 +1,22 @@
+
+The following have been reloaded with a version change:
+  1) cuda/11.7.1 => cuda/11.5.0
+
+/home/groups/henderj/rzwang/code/volume_decoding.py:103: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+  trial_data = np.array(trial_data)
+/home/groups/henderj/rzwang/code/volume_decoding.py:104: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+  trial_labels = np.array(trial_labels)
+/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/modules/loss.py:520: UserWarning: Using a target size (torch.Size([1])) that is different to the input size (torch.Size([])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return F.mse_loss(input, target, reduction=self.reduction)
+Traceback (most recent call last):
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 723, in <module>
+    main()
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 707, in main
+    raise e
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 626, in main
+    learning_rate=args.learning_rate
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 239, in train_volume_decoder
+    batch_size=batch_size
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 556, in decode_volume
+    predictions.extend(outputs.cpu().numpy())
+TypeError: iteration over a 0-d array

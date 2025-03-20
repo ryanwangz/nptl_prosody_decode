@@ -34,3 +34,4 @@ Web UI available at http://127.0.0.1:8082
 [2025-03-19 14:19:25] info [ddc367e stderr]: [14:19:25] [File Watcher (node.js)] Watcher shutdown because watched path got deleted
 [2025-03-19 16:24:44] info [ddc367e stdout]: [16:24:44] [<unknown>][4cbdd69a][ExtensionHostConnection] <49190> Extension Host Process exited with code: 0, signal: null.
 [2025-03-19 17:16:58] info [ddc367e stdout]: [17:16:58] [<unknown>][9a884fef][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+[2025-03-19 18:16:58] info [ddc367e process]: idle timeout reached, ending

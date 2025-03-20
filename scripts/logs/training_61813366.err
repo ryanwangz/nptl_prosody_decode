@@ -1,0 +1,34 @@
+
+The following have been reloaded with a version change:
+  1) cuda/11.7.1 => cuda/11.5.0
+
+/home/groups/henderj/rzwang/code/volume_decoding.py:103: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+  trial_data = np.array(trial_data)
+/home/groups/henderj/rzwang/code/volume_decoding.py:104: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray
+  trial_labels = np.array(trial_labels)
+Traceback (most recent call last):
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 723, in <module>
+    main()
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 707, in main
+    raise e
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 626, in main
+    learning_rate=args.learning_rate
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 171, in train_volume_decoder
+    outputs = model(batch_data)
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/groups/henderj/rzwang/code/volume_decoding.py", line 75, in forward
+    return self.fc(x).squeeze()
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/modules/container.py", line 141, in forward
+    input = module(input)
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 179, in forward
+    self.eps,
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/functional.py", line 2280, in batch_norm
+    _verify_batch_size(input.size())
+  File "/home/groups/henderj/rzwang/vscode_env/lib64/python3.6/site-packages/torch/nn/functional.py", line 2248, in _verify_batch_size
+    raise ValueError("Expected more than 1 value per channel when training, got input size {}".format(size))
+ValueError: Expected more than 1 value per channel when training, got input size torch.Size([1, 256])

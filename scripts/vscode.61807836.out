@@ -1,0 +1,35 @@
+*
+* Visual Studio Code Server
+*
+* By using the software, you agree to
+* the Visual Studio Code Server License Terms (https://aka.ms/vscode-server-license) and
+* the Microsoft Privacy Statement (https://privacy.microsoft.com/en-US/privacystatement).
+*
+Web UI available at http://127.0.0.1:8083
+[2025-03-20 11:31:48] info Starting server ddc367ed5c8936efe395cffeec279b04ffd7db78
+[2025-03-20 11:31:49] info [ddc367e stdout]: *
+[2025-03-20 11:31:49] info [ddc367e stdout]: * Visual Studio Code Server
+[2025-03-20 11:31:49] info [ddc367e stdout]: *
+[2025-03-20 11:31:49] info [ddc367e stdout]: * By using the software, you agree to
+[2025-03-20 11:31:49] info [ddc367e stdout]: * the Visual Studio Code Server License Terms (https://aka.ms/vscode-server-license) and
+[2025-03-20 11:31:49] info [ddc367e stdout]: * the Microsoft Privacy Statement (https://privacy.microsoft.com/en-US/privacystatement).
+[2025-03-20 11:31:49] info [ddc367e stdout]: *
+[2025-03-20 11:31:49] info [ddc367e stdout]: Server bound to /tmp/code-47679bf1-1e74-47d9-9e67-be4e2aee117e
+[2025-03-20 11:31:49] info [ddc367e stdout]: Extension host agent listening on /tmp/code-47679bf1-1e74-47d9-9e67-be4e2aee117e
+[2025-03-20 11:31:49] info [ddc367e stdout]: 
+[2025-03-20 11:31:50] info [ddc367e stdout]: [11:31:50] 
+[2025-03-20 11:31:50] info [ddc367e stdout]: 
+[2025-03-20 11:31:50] info [ddc367e stdout]: 
+[2025-03-20 11:31:50] info [ddc367e stdout]: 
+[2025-03-20 11:31:50] info [ddc367e stdout]: 
+[2025-03-20 11:31:53] info [ddc367e stdout]: [11:31:53] Extension host agent started.
+[2025-03-20 11:31:57] info [ddc367e stdout]: [11:31:57] [<unknown>][fd13c1e1][ExtensionHostConnection] New connection established.
+[2025-03-20 11:31:57] info [ddc367e stdout]: [11:31:57] [<unknown>][fd13c1e1][ExtensionHostConnection] <32384> Launched Extension Host Process.
+[2025-03-20 11:31:57] info [ddc367e stdout]: [11:31:57] [<unknown>][23b3bc3a][ManagementConnection] New connection established.
+[2025-03-20 11:32:19] info [ddc367e stdout]: [11:32:19] [<unknown>][23b3bc3a][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+[2025-03-20 11:32:23] info [ddc367e stdout]: [11:32:23] [<unknown>][122539e3][ExtensionHostConnection] New connection established.
+[2025-03-20 11:32:23] info [ddc367e stdout]: [11:32:23] [<unknown>][ee3dd3d4][ManagementConnection] New connection established.
+[2025-03-20 11:32:23] info [ddc367e stdout]: [11:32:23] [<unknown>][122539e3][ExtensionHostConnection] <33519> Launched Extension Host Process.
+[2025-03-20 11:36:37] info [ddc367e stderr]: [11:36:37] [File Watcher] Inotify limit reached (ENOSPC) (path: /home/groups/henderj/rzwang)
+[2025-03-20 12:44:42] info [ddc367e stderr]: [12:44:42] [File Watcher (node.js)] Watcher shutdown because watched path got deleted
+[2025-03-20 14:32:49] info [ddc367e stdout]: [14:32:49] [<unknown>][fd13c1e1][ExtensionHostConnection] <32384> Extension Host Process exited with code: 0, signal: null.

@@ -25,11 +25,12 @@ mkdir -p logs
 
 # Run the training script with parameters
 python /home/groups/henderj/rzwang/code/volume_decoding.py \
-    --window_size 10 \
+    --window_size 5 \
     --stride 1 \
     --batch_size 64 \
     --n_epochs 300 \
     --learning_rate 0.0001 \
     --train_split 0.8 \
     --output_dir /home/groups/henderj/rzwang/results \
-    --type hz
+    --type db \
+    --normalized "False"

@@ -1,0 +1,8 @@
+*
+* Visual Studio Code Server
+*
+* By using the software, you agree to
+* the Visual Studio Code Server License Terms (https://aka.ms/vscode-server-license) and
+* the Microsoft Privacy Statement (https://privacy.microsoft.com/en-US/privacystatement).
+*
+[2025-03-20 11:07:11] error could not start server on the given host/port: error creating server listener: Address in use (os error 98)

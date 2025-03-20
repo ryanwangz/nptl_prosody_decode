@@ -1,1 +1,2 @@
 mkdir: cannot create directory ‘/home/users/rzwang/bin’: File exists
+slurmstepd: error: *** JOB 61753745 ON sh04-04n07 CANCELLED AT 2025-03-20T10:27:02 ***
