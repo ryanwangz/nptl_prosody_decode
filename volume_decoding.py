@@ -11,6 +11,8 @@ import torch.utils.data
 import os
 import logging
 import json
+import time
+import random
 from datetime import datetime
 # from torchsummary import summary
 from scipy import stats
@@ -25,9 +27,9 @@ import matplotlib.pyplot as plt
 from decoders import *
 from train_functions import *
 
-DECODING_TYPE = 'volume_no_silence' # For plot titles 'volume' or 'pitch'
-UNITS = '(db)' # For plots '(db)' or '(hz)'
-FILE_TAG = 'db_no_sil' #(processed_data_{FILE_TAG}) 'hz' or 'db
+DECODING_TYPE = 'pitch_no_silence' # For plot titles 'volume' or 'pitch'
+UNITS = '(hz)' # For plots '(db)' or '(hz)'
+FILE_TAG = 'hz_no_sil' #(processed_data_{FILE_TAG}) 'hz' or 'db
 
 # Add after imports
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -72,7 +74,7 @@ class CNNVolumeDecoder(nn.Module):
         x = x.view(x.size(0), -1)
         return self.fc(x).squeeze()
 
-def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_size=5, stride=1, 
+def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id, window_size=5, stride=1, 
                         batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
     
     num_workers = mp.cpu_count
@@ -111,8 +113,11 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     #Split the data
     train_data = np.concatenate(trial_data[train_trial_indices])
     train_labels = np.concatenate(trial_labels[train_trial_indices])
+
     test_data = np.concatenate(trial_data[test_trial_indices])
     test_labels = np.concatenate(trial_labels[test_trial_indices])
+    #ok, so this is where the later error might be occurring-- because they're being split? should it be trial_labels then?
+
     train_dataset = torch.utils.data.TensorDataset(
         torch.FloatTensor(train_data),
         torch.FloatTensor(train_labels)  # Changed from LongTensor
@@ -148,7 +153,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     ) #changed factor and patience from 0.5 and 5 originally
     best_loss = float('inf')
     patience_counter = 0
-    max_patience = 40
+    max_patience = 100
     min_improvement = 0.0001
 
     for epoch in range(n_epochs):
@@ -200,7 +205,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
             best_loss = avg_test_loss
             patience_counter = 0
             # Save best model
-            torch.save(model.state_dict(), 'best_model.pt')
+            torch.save(model.state_dict(), f'best_model_{run_id}.pt')
         else:
             patience_counter += 1
             
@@ -222,9 +227,9 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     print(f'Saving test statistics \n')
 
     # Load best model
-    model.load_state_dict(torch.load('best_model.pt'))
+    model.load_state_dict(torch.load(f'best_model_{run_id}.pt'))
     # make predictions on test set
-    predictions = decode_volume(
+    predictions_test = decode_volume(
         model=model,
         test_data=test_data,
         window_size=window_size,
@@ -233,13 +238,26 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     )
     
     #Calculate and log metrics
-    accuracy = np.mean(np.abs(predictions - test_labels)).item()
+    accuracy = np.mean(np.abs(predictions_test - test_labels)).item()
     logging.info(f"Test MAE: {accuracy:.4f}")
+
+    # Do the same with the training data for curiosity/overfitting's sake
+    predictions_train = decode_volume(
+        model=model,
+        test_data=train_data,
+        window_size=window_size,
+        stride=stride,
+        batch_size=batch_size
+    )
+    
+    #Calculate and log metrics
+    accuracy = np.mean(np.abs(predictions_train - train_labels)).item()
+    logging.info(f"Train MAE: {accuracy:.4f}")
 
     #save a handful of trial plots here (maybe 3 best and 3 worst trials?)
     
     # Create directory for saving plots if it doesn't exist
-    plot_dir = f'/home/groups/henderj/rzwang/figures/{DECODING_TYPE}_plots/{DECODING_TYPE}_plot_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
+    plot_dir = f'/home/groups/henderj/rzwang/figures/{DECODING_TYPE}_plots/{DECODING_TYPE}_plot_{run_id}'
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
@@ -249,14 +267,15 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     trial_actual = []
     trial_errors_train = []
 
-    current_idx = 0
+    current_idx_test = 0
+    current_idx_train = 0
     for i, trial in enumerate(trial_info):
         if i in test_trial_indices:  # Only evaluate test trials
             n_bins = trial['n_bins']
             n_windows = (n_bins - window_size) // stride + 1
             
-            trial_pred = predictions[current_idx:current_idx + n_windows]
-            trial_true = test_labels[current_idx:current_idx + n_windows]
+            trial_pred = predictions_test[current_idx_test:current_idx_test + n_windows]
+            trial_true = test_labels[current_idx_test:current_idx_test + n_windows]
             trial_mae = np.mean(np.abs(trial_pred - trial_true))
             
             trial_errors_test.append({
@@ -267,13 +286,13 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
                 'audio_file': trial['audio_file']
             })
             
-            current_idx += n_windows
+            current_idx_test += n_windows
         else: #in train trials
             n_bins = trial['n_bins']
             n_windows = (n_bins - window_size) // stride + 1
             
-            trial_pred = predictions[current_idx:current_idx + n_windows]
-            trial_true = test_labels[current_idx:current_idx + n_windows]
+            trial_pred = predictions_train[current_idx_train:current_idx_train + n_windows]
+            trial_true = train_labels[current_idx_train:current_idx_train + n_windows]
             trial_mae = np.mean(np.abs(trial_pred - trial_true))
             
             trial_errors_train.append({
@@ -283,7 +302,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
                 'actual': trial_true,
                 'audio_file': trial['audio_file']
             })
-            current_idx += n_windows            
+            current_idx_train += n_windows            
 
 
     # Sort trials by error
@@ -361,7 +380,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     # Create summary plot
     plt.figure(figsize=(15, 10))
     # figures
-    for i, trial in enumerate(best_trials_test):
+    for i, trial in enumerate(best_trials_train):
         plt.subplot(2, 3, i+1)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
         plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
@@ -370,7 +389,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
         if i == 0:
             plt.legend()
 
-    for i, trial in enumerate(worst_trials_test):
+    for i, trial in enumerate(worst_trials_train):
         plt.subplot(2, 3, i+4)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
         plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
@@ -429,7 +448,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     print("\nWorst trials:")
     for i, trial in enumerate(worst_trials_test):
         print(f"  {i+1}. File: {trial['audio_file']}, MAE: {trial['error']:.4f}")
-    print(f"\nMean trial error: {trial_stats['mean_error_test']:.4f} ± {trial_stats['std_error']:.4f}")
+    print(f"\nMean trial error: {trial_stats['mean_error_test']:.4f} ± {trial_stats['std_error_test']:.4f}")
 
 
     logging.info(f"\nPlots and statistics saved to {plot_dir}/")
@@ -439,7 +458,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     logging.info("\nWorst trials:")
     for i, trial in enumerate(worst_trials_test):
         logging.info(f"  {i+1}. File: {trial['audio_file']}, MAE: {trial['error']:.4f}")
-    logging.info(f"\nMean trial error: {trial_stats['mean_error_test']:.4f} ± {trial_stats['std_error']:.4f}")
+    logging.info(f"\nMean trial error: {trial_stats['mean_error_test']:.4f} ± {trial_stats['std_error_test']:.4f}")
 
     print("Statistics on TRAIN set:\n")
     print("Best trials:")
@@ -448,7 +467,7 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     print("\nWorst trials:")
     for i, trial in enumerate(worst_trials_train):
         print(f"  {i+1}. File: {trial['audio_file']}, MAE: {trial['error']:.4f}")
-    print(f"\nMean trial error: {trial_stats['mean_error_train']:.4f} ± {trial_stats['std_error']:.4f}")
+    print(f"\nMean trial error: {trial_stats['mean_error_train']:.4f} ± {trial_stats['std_error_train']:.4f}")
 
 
     logging.info(f"\nPlots and statistics saved to {plot_dir}/")
@@ -458,19 +477,32 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, window_
     logging.info("\nWorst trials:")
     for i, trial in enumerate(worst_trials_train):
         logging.info(f"  {i+1}. File: {trial['audio_file']}, MAE: {trial['error']:.4f}")
-    logging.info(f"\nMean trial error: {trial_stats['mean_error_train']:.4f} ± {trial_stats['std_error']:.4f}")
+    logging.info(f"\nMean trial error: {trial_stats['mean_error_train']:.4f} ± {trial_stats['std_error_train']:.4f}")
 
 
     return model, test_data, test_labels
 
 
+def save_config(config_path, args, run_id):
+    config = {
+        'args': vars(args),
+        'run_id': run_id,
+        'decoding_type': DECODING_TYPE,
+        'units': UNITS,
+        'file_tag': FILE_TAG,
+        'device': str(device),
+        'timestamp': datetime.now().isoformat()
+    }
+    with open(config_path, 'w') as f:
+        json.dump(config, f, indent=4)
+
 def decode_volume(model, test_data, window_size=5, stride=1, batch_size=32):
-    
+    model = model.to(device)
     model.eval()
     windowed_data = test_data  #assuming test_data is already windowed
     
     # Convert to torch tensor
-    test_dataset = torch.FloatTensor(windowed_data)
+    test_dataset = torch.FloatTensor(windowed_data).to(device)
     # test_loader = torch.utils.data.DataLoader(
     #     test_dataset, 
     #     batch_size=batch_size,
@@ -502,9 +534,16 @@ def main():
     # decoding_type = 'volume'
     # units = '(db)'
     # file_tag = 'db'
-    log_file = os.path.join(args.output_dir, 'logs', f'{DECODING_TYPE}_training_log_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt')
+
+    ## To prevent the parallel conflicts-- generate a unique (ish) ID for this session
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")  # Added microseconds
+    random_suffix = f"{random.randint(0, 99999):04d}"
+    run_id = f"{timestamp}_{random_suffix}_{FILE_TAG}"
+
+    log_file = os.path.join(args.output_dir, 'logs', f'{DECODING_TYPE}_log_{run_id}.txt')
     os.makedirs('results', exist_ok=True)
     os.makedirs('logs', exist_ok=True)
+    time.sleep(random.uniform(0, 1))
 
     try:
         logging.basicConfig(
@@ -525,6 +564,7 @@ def main():
             labels=volume_labels,
             trial_info=trial_info,
             decoder_class=CNNVolumeDecoder,
+            run_id=run_id,
             window_size=args.window_size,
             stride=args.stride,
             batch_size=args.batch_size,
@@ -533,7 +573,7 @@ def main():
         )
 
         #save
-        model_path = os.path.join(args.output_dir, 'models', f'{DECODING_TYPE}_model_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pt')
+        model_path = os.path.join(args.output_dir, 'models', f'{DECODING_TYPE}_model_{run_id}.pt')
         torch.save(model.state_dict(), model_path)
         predictions = decode_volume(
             model=model,
@@ -579,7 +619,7 @@ def main():
         plt.tight_layout()
         
         # Save plots
-        plot_path = f'/home/groups/henderj/rzwang/figures/{DECODING_TYPE}_prediction_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png'
+        plot_path = f'/home/groups/henderj/rzwang/figures/{DECODING_TYPE}_prediction_{run_id}.png'
         plt.savefig(plot_path)
         plt.close()
         
@@ -591,13 +631,18 @@ def main():
             'mae': mae,
             'r2': r2
         }
-        results_path = os.path.join(args.output_dir, 'npys', f'{DECODING_TYPE}_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.npy')
+        results_path = os.path.join(args.output_dir, 'npys', f'{DECODING_TYPE}_results_{run_id}.npy')
         np.save(results_path, results)
-        
+        # In main():
+        config_path = os.path.join(args.output_dir, 'configs', f'config_{run_id}.json')
+        save_config(config_path, args, run_id)
+
         logging.info("Training and evaluation completed successfully")
+
         logging.info(f"Model saved to: {model_path}")
         logging.info(f"Results saved to: {results_path}")
         logging.info(f"Plots saved to: {plot_path}")
+        logging.info(f"Config saved to: {config_path}")
         
     except Exception as e:
         logging.error(f"Error: {str(e)}")
@@ -612,6 +657,7 @@ def parse_args():
     parser.add_argument('--learning_rate', type=float, default=0.001)
     parser.add_argument('--train_split', type=float, default=0.8)
     parser.add_argument('--output_dir', type=str, default='results')
+    parser.add_argument('--type', type=str, default='hz') #hz or db
     return parser.parse_args()
 
 if __name__ == "__main__":
