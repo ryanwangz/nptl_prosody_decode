@@ -1,24 +1,91 @@
 #functions for training decoders
 #pilot of the model
-
+import argparse
 import torch
 import numpy as np
 import torch.optim
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
-# from torchsummary import summary
-from scipy import stats
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
-#some other ones: torchsummary, sklearn metrics, early stopping?
+import os
+import logging
+import json
+import time
+import random
 from datetime import datetime
 # from torchsummary import summary
 from scipy import stats
 #some other ones: torchsummary, sklearn metrics, early stopping? seaborn/matplotlib
 import seaborn as sns
+import torch.multiprocessing as mp
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import r2_score
+
+import matplotlib.pyplot as plt
+
 from decoders import *
 
+
+class MaskedMSELoss(nn.Module): #For excluding silence from mseloss calculations
+    def __init__(self):
+        super(MaskedMSELoss, self).__init__()
+        
+    def forward(self, predictions, targets, normalized=False):
+        if normalized:
+            # For normalized data, we need to calculate the threshold differently
+            # Assuming silence was normalized along with the rest of the data
+            mask = ~torch.isclose(targets, torch.zeros_like(targets), atol=1e-5)
+        else:
+            # For non-normalized data, silence is exactly 0
+            mask = targets != 0
+
+        # Convert mask to float and ensure it's on the same device
+        mask = mask.float().to(predictions.device)
+        squared_diff = (predictions - targets) ** 2
+        mse = (squared_diff * mask).sum() / (mask.sum() + 1e-8)  # Add small epsilon to prevent division by zero
+        # # Only compute loss for non-silence portions
+        # if mask.sum() == 0:  # Handle case where batch is all silence
+        #     return torch.tensor(0.0, device=predictions.device)        
+        # mse = ((predictions[mask] - targets[mask]) ** 2).mean()
+        return mse
+    
+def plot_learning_curves(train_losses, test_losses, train_maes, test_maes, plot_dir, decoding_type):
+    # Plot losses
+    plt.figure(figsize=(12, 5))
+    
+    plt.subplot(1, 2, 1)
+    plt.plot(train_losses, label='Train Loss', color='blue', alpha=0.7)
+    plt.plot(test_losses, label='Test Loss', color='red', alpha=0.7)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss (MSE)')
+    plt.title(f'{decoding_type} Training and Test Loss')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.subplot(1, 2, 2)
+    plt.plot(train_maes, label='Train MAE', color='blue', alpha=0.7)
+    plt.plot(test_maes, label='Test MAE', color='red', alpha=0.7)
+    plt.xlabel('Epoch')
+    plt.ylabel('MAE')
+    plt.title(f'{decoding_type} Training and Test MAE')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, 'learning_curves.png'))
+    plt.close()
+
+def calculate_masked_metrics(predictions, labels, normalized=False):
+    if normalized:
+        mask = ~np.isclose(labels, np.zeros_like(labels), atol=1e-5)
+    else:
+        mask = labels != 0
+        
+    if mask.sum() == 0:
+        return 0.0, 0.0, 0.0, 0.0, 1.0  # Return null metrics if all silenc
+    mse = np.mean((predictions[mask] - labels[mask]) ** 2)
+    mae = np.mean(np.abs(predictions[mask] - labels[mask]))
+    r2 = r2_score(labels[mask], predictions[mask])
+    pearson_r, p_value = stats.pearsonr(labels[mask], predictions[mask])
+    return mse, mae, r2, pearson_r, p_value
 #Function to create windowed data
 def create_windows(data, window_size, stride=1):
     """

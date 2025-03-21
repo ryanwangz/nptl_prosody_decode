@@ -1,0 +1,553 @@
+running
+Using device: cpu
+Epoch: 1/500
+Train Loss (MSE): 3141.3559 | Train MAE: 48.6429
+Test Loss (MSE): 2552.2944 | Test MAE: 47.8580
+--------------------
+Epoch: 2/500
+Train Loss (MSE): 2924.9698 | Train MAE: 47.9179
+Test Loss (MSE): 2504.3027 | Test MAE: 46.8516
+--------------------
+Epoch: 3/500
+Train Loss (MSE): 2742.7281 | Train MAE: 46.7486
+Test Loss (MSE): 2806.1126 | Test MAE: 47.0074
+--------------------
+Epoch: 4/500
+Train Loss (MSE): 2564.9027 | Train MAE: 45.3517
+Test Loss (MSE): 3944.7578 | Test MAE: 47.0612
+--------------------
+Epoch: 5/500
+Train Loss (MSE): 2376.5300 | Train MAE: 43.7080
+Test Loss (MSE): 2402.1646 | Test MAE: 38.9884
+--------------------
+Epoch: 6/500
+Train Loss (MSE): 2172.1526 | Train MAE: 41.8079
+Test Loss (MSE): 3234.5420 | Test MAE: 35.2664
+--------------------
+Epoch: 7/500
+Train Loss (MSE): 1947.7464 | Train MAE: 39.5421
+Test Loss (MSE): 1475.5088 | Test MAE: 31.5600
+--------------------
+Epoch: 8/500
+Train Loss (MSE): 1710.2300 | Train MAE: 36.9821
+Test Loss (MSE): 2466.3253 | Test MAE: 38.6005
+--------------------
+Epoch: 9/500
+Train Loss (MSE): 1459.3077 | Train MAE: 34.0599
+Test Loss (MSE): 23629.2035 | Test MAE: 31.6922
+--------------------
+Epoch: 10/500
+Train Loss (MSE): 1208.3850 | Train MAE: 30.8060
+Test Loss (MSE): 2228.8149 | Test MAE: 30.0168
+--------------------
+Epoch: 11/500
+Train Loss (MSE): 966.9470 | Train MAE: 27.4790
+Test Loss (MSE): 1442.3050 | Test MAE: 26.7040
+--------------------
+Epoch: 12/500
+Train Loss (MSE): 757.3956 | Train MAE: 24.3527
+Test Loss (MSE): 1524.8376 | Test MAE: 21.6050
+--------------------
+Epoch: 13/500
+Train Loss (MSE): 595.0920 | Train MAE: 21.6669
+Test Loss (MSE): 1765.6934 | Test MAE: 16.4685
+--------------------
+Epoch: 14/500
+Train Loss (MSE): 479.4739 | Train MAE: 19.6784
+Test Loss (MSE): 1261.8246 | Test MAE: 14.0539
+--------------------
+Epoch: 15/500
+Train Loss (MSE): 415.4059 | Train MAE: 18.6064
+Test Loss (MSE): 524.4400 | Test MAE: 13.9516
+--------------------
+Epoch: 16/500
+Train Loss (MSE): 382.3824 | Train MAE: 18.0450
+Test Loss (MSE): 762.2693 | Test MAE: 16.3155
+--------------------
+Epoch: 17/500
+Train Loss (MSE): 368.2369 | Train MAE: 17.8445
+Test Loss (MSE): 343.7473 | Test MAE: 12.0347
+--------------------
+Epoch: 18/500
+Train Loss (MSE): 361.4655 | Train MAE: 17.7506
+Test Loss (MSE): 431.8411 | Test MAE: 12.1882
+--------------------
+Epoch: 19/500
+Train Loss (MSE): 358.1661 | Train MAE: 17.6962
+Test Loss (MSE): 268.2648 | Test MAE: 11.6000
+--------------------
+Epoch: 20/500
+Train Loss (MSE): 352.9053 | Train MAE: 17.7023
+Test Loss (MSE): 1327.7074 | Test MAE: 12.1145
+--------------------
+Epoch: 21/500
+Train Loss (MSE): 348.9183 | Train MAE: 17.5738
+Test Loss (MSE): 502.2974 | Test MAE: 12.9504
+--------------------
+Epoch: 22/500
+Train Loss (MSE): 342.3407 | Train MAE: 17.5507
+Test Loss (MSE): 487.7921 | Test MAE: 12.2102
+--------------------
+Epoch: 23/500
+Train Loss (MSE): 346.0930 | Train MAE: 17.5697
+Test Loss (MSE): 505.0368 | Test MAE: 12.4445
+--------------------
+Epoch: 24/500
+Train Loss (MSE): 336.7354 | Train MAE: 17.4786
+Test Loss (MSE): 362.6305 | Test MAE: 12.2542
+--------------------
+Epoch: 25/500
+Train Loss (MSE): 329.9470 | Train MAE: 17.3951
+Test Loss (MSE): 8947.0336 | Test MAE: 13.8669
+--------------------
+Epoch: 26/500
+Train Loss (MSE): 325.8910 | Train MAE: 17.3007
+Test Loss (MSE): 249.2763 | Test MAE: 11.8773
+--------------------
+Epoch: 27/500
+Train Loss (MSE): 319.1972 | Train MAE: 17.2465
+Test Loss (MSE): 259.5006 | Test MAE: 11.9620
+--------------------
+Epoch: 28/500
+Train Loss (MSE): 313.5317 | Train MAE: 17.1783
+Test Loss (MSE): 258.7247 | Test MAE: 12.2289
+--------------------
+Epoch: 29/500
+Train Loss (MSE): 309.8870 | Train MAE: 17.0888
+Test Loss (MSE): 263.3053 | Test MAE: 11.6336
+--------------------
+Epoch: 30/500
+Train Loss (MSE): 301.7735 | Train MAE: 17.0892
+Test Loss (MSE): 243.4124 | Test MAE: 11.8950
+--------------------
+Epoch: 31/500
+Train Loss (MSE): 293.5766 | Train MAE: 16.9380
+Test Loss (MSE): 268.7012 | Test MAE: 12.1706
+--------------------
+Epoch: 32/500
+Train Loss (MSE): 289.3223 | Train MAE: 16.9652
+Test Loss (MSE): 276.5861 | Test MAE: 13.0817
+--------------------
+Epoch: 33/500
+Train Loss (MSE): 279.6753 | Train MAE: 16.8399
+Test Loss (MSE): 269.1515 | Test MAE: 12.2248
+--------------------
+Epoch: 34/500
+Train Loss (MSE): 274.8079 | Train MAE: 16.8102
+Test Loss (MSE): 313.9565 | Test MAE: 13.3304
+--------------------
+Epoch: 35/500
+Train Loss (MSE): 269.0930 | Train MAE: 16.8373
+Test Loss (MSE): 301.1276 | Test MAE: 13.3852
+--------------------
+Epoch: 36/500
+Train Loss (MSE): 262.3389 | Train MAE: 16.7330
+Test Loss (MSE): 347.7702 | Test MAE: 13.8118
+--------------------
+Epoch: 37/500
+Train Loss (MSE): 253.9260 | Train MAE: 16.6840
+Test Loss (MSE): 299.9607 | Test MAE: 13.0563
+--------------------
+Epoch: 38/500
+Train Loss (MSE): 248.5440 | Train MAE: 16.6364
+Test Loss (MSE): 316.9001 | Test MAE: 13.6157
+--------------------
+Epoch: 39/500
+Train Loss (MSE): 247.2268 | Train MAE: 16.6871
+Test Loss (MSE): 377.0138 | Test MAE: 14.5260
+--------------------
+Epoch: 40/500
+Train Loss (MSE): 240.2508 | Train MAE: 16.6064
+Test Loss (MSE): 875.5351 | Test MAE: 14.0648
+--------------------
+Epoch: 41/500
+Train Loss (MSE): 235.6741 | Train MAE: 16.6151
+Test Loss (MSE): 323.2618 | Test MAE: 13.5395
+--------------------
+Epoch: 42/500
+Train Loss (MSE): 231.5657 | Train MAE: 16.5919
+Test Loss (MSE): 310.2941 | Test MAE: 13.0326
+--------------------
+Epoch: 43/500
+Train Loss (MSE): 224.8903 | Train MAE: 16.5543
+Test Loss (MSE): 440.5405 | Test MAE: 16.2384
+--------------------
+Epoch: 44/500
+Train Loss (MSE): 224.8505 | Train MAE: 16.6878
+Test Loss (MSE): 335.9111 | Test MAE: 13.3961
+--------------------
+Epoch: 45/500
+Train Loss (MSE): 215.2481 | Train MAE: 16.4911
+Test Loss (MSE): 374.2379 | Test MAE: 13.9492
+--------------------
+Epoch: 46/500
+Train Loss (MSE): 212.4576 | Train MAE: 16.5705
+Test Loss (MSE): 360.0824 | Test MAE: 13.8857
+--------------------
+Epoch: 47/500
+Train Loss (MSE): 209.8601 | Train MAE: 16.5360
+Test Loss (MSE): 386.1182 | Test MAE: 14.3455
+--------------------
+Epoch: 48/500
+Train Loss (MSE): 204.9565 | Train MAE: 16.5643
+Test Loss (MSE): 355.3369 | Test MAE: 13.5293
+--------------------
+Epoch: 49/500
+Train Loss (MSE): 201.8609 | Train MAE: 16.5805
+Test Loss (MSE): 372.9671 | Test MAE: 13.7278
+--------------------
+Epoch: 50/500
+Train Loss (MSE): 200.3899 | Train MAE: 16.5352
+Test Loss (MSE): 425.7900 | Test MAE: 14.5008
+--------------------
+Epoch: 51/500
+Train Loss (MSE): 195.4679 | Train MAE: 16.5036
+Test Loss (MSE): 559.8916 | Test MAE: 16.0283
+--------------------
+Epoch: 52/500
+Train Loss (MSE): 193.0082 | Train MAE: 16.5372
+Test Loss (MSE): 421.0099 | Test MAE: 14.2700
+--------------------
+Epoch: 53/500
+Train Loss (MSE): 187.0915 | Train MAE: 16.5267
+Test Loss (MSE): 478.6296 | Test MAE: 15.2430
+--------------------
+Epoch: 54/500
+Train Loss (MSE): 186.1823 | Train MAE: 16.4444
+Test Loss (MSE): 508.8176 | Test MAE: 15.4803
+--------------------
+Epoch: 55/500
+Train Loss (MSE): 184.4853 | Train MAE: 16.5415
+Test Loss (MSE): 491.4617 | Test MAE: 14.4228
+--------------------
+Epoch: 56/500
+Train Loss (MSE): 182.2275 | Train MAE: 16.5067
+Test Loss (MSE): 412.9003 | Test MAE: 13.9571
+--------------------
+Epoch: 57/500
+Train Loss (MSE): 177.9263 | Train MAE: 16.4668
+Test Loss (MSE): 694.2523 | Test MAE: 16.5917
+--------------------
+Epoch: 58/500
+Train Loss (MSE): 177.2424 | Train MAE: 16.4770
+Test Loss (MSE): 476.6162 | Test MAE: 14.5185
+--------------------
+Epoch: 59/500
+Train Loss (MSE): 173.6329 | Train MAE: 16.4863
+Test Loss (MSE): 414.5496 | Test MAE: 13.7652
+--------------------
+Epoch: 60/500
+Train Loss (MSE): 171.0591 | Train MAE: 16.4497
+Test Loss (MSE): 520.0383 | Test MAE: 14.5846
+--------------------
+Epoch: 61/500
+Train Loss (MSE): 168.0361 | Train MAE: 16.4423
+Test Loss (MSE): 797.7724 | Test MAE: 17.1530
+--------------------
+Epoch: 62/500
+Train Loss (MSE): 167.4714 | Train MAE: 16.4526
+Test Loss (MSE): 571.2024 | Test MAE: 15.8789
+--------------------
+Epoch: 63/500
+Train Loss (MSE): 168.4548 | Train MAE: 16.5133
+Test Loss (MSE): 581.5427 | Test MAE: 15.6265
+--------------------
+Epoch: 64/500
+Train Loss (MSE): 162.8457 | Train MAE: 16.4229
+Test Loss (MSE): 489.4211 | Test MAE: 14.3089
+--------------------
+Epoch: 65/500
+Train Loss (MSE): 162.8438 | Train MAE: 16.4631
+Test Loss (MSE): 710.6443 | Test MAE: 16.3011
+--------------------
+Epoch: 66/500
+Train Loss (MSE): 161.5164 | Train MAE: 16.5241
+Test Loss (MSE): 553.1595 | Test MAE: 15.3743
+--------------------
+Epoch: 67/500
+Train Loss (MSE): 160.4503 | Train MAE: 16.4959
+Test Loss (MSE): 636.8371 | Test MAE: 15.9699
+--------------------
+Epoch: 68/500
+Train Loss (MSE): 158.5771 | Train MAE: 16.4862
+Test Loss (MSE): 812.6635 | Test MAE: 16.8507
+--------------------
+Epoch: 69/500
+Train Loss (MSE): 159.7328 | Train MAE: 16.5663
+Test Loss (MSE): 725.5833 | Test MAE: 17.1327
+--------------------
+Epoch: 70/500
+Train Loss (MSE): 154.7558 | Train MAE: 16.5130
+Test Loss (MSE): 779.4067 | Test MAE: 16.8712
+--------------------
+Epoch    71: reducing learning rate of group 0 to 8.0000e-05.
+Epoch: 71/500
+Train Loss (MSE): 153.5576 | Train MAE: 16.4205
+Test Loss (MSE): 488.6024 | Test MAE: 14.1752
+--------------------
+Epoch: 72/500
+Train Loss (MSE): 152.8760 | Train MAE: 16.5303
+Test Loss (MSE): 577.7793 | Test MAE: 15.0099
+--------------------
+Epoch: 73/500
+Train Loss (MSE): 150.7737 | Train MAE: 16.5075
+Test Loss (MSE): 569.1394 | Test MAE: 15.0690
+--------------------
+Epoch: 74/500
+Train Loss (MSE): 147.1645 | Train MAE: 16.4562
+Test Loss (MSE): 550.6701 | Test MAE: 15.0975
+--------------------
+Epoch: 75/500
+Train Loss (MSE): 147.2851 | Train MAE: 16.4832
+Test Loss (MSE): 624.3289 | Test MAE: 15.2950
+--------------------
+Epoch: 76/500
+Train Loss (MSE): 145.0146 | Train MAE: 16.4508
+Test Loss (MSE): 1094.0900 | Test MAE: 18.4238
+--------------------
+Epoch: 77/500
+Train Loss (MSE): 146.3608 | Train MAE: 16.4762
+Test Loss (MSE): 774.7056 | Test MAE: 16.5179
+--------------------
+Epoch: 78/500
+Train Loss (MSE): 145.2287 | Train MAE: 16.5013
+Test Loss (MSE): 899.2523 | Test MAE: 17.4058
+--------------------
+Epoch: 79/500
+Train Loss (MSE): 145.6943 | Train MAE: 16.4693
+Test Loss (MSE): 778.6009 | Test MAE: 16.2659
+--------------------
+Epoch: 80/500
+Train Loss (MSE): 144.7108 | Train MAE: 16.5251
+Test Loss (MSE): 986.0027 | Test MAE: 17.5608
+--------------------
+Epoch: 81/500
+Train Loss (MSE): 144.6087 | Train MAE: 16.5046
+Test Loss (MSE): 615.3129 | Test MAE: 14.9898
+--------------------
+Epoch: 82/500
+Train Loss (MSE): 143.4401 | Train MAE: 16.5485
+Test Loss (MSE): 867.3098 | Test MAE: 17.3978
+--------------------
+Epoch: 83/500
+Train Loss (MSE): 141.9404 | Train MAE: 16.5169
+Test Loss (MSE): 654.1004 | Test MAE: 15.3917
+--------------------
+Epoch: 84/500
+Train Loss (MSE): 142.0530 | Train MAE: 16.5021
+Test Loss (MSE): 759.3373 | Test MAE: 16.3232
+--------------------
+Epoch: 85/500
+Train Loss (MSE): 140.5402 | Train MAE: 16.4999
+Test Loss (MSE): 688.7611 | Test MAE: 15.7084
+--------------------
+Epoch: 86/500
+Train Loss (MSE): 139.7962 | Train MAE: 16.4915
+Test Loss (MSE): 819.3523 | Test MAE: 16.5262
+--------------------
+Epoch: 87/500
+Train Loss (MSE): 139.0289 | Train MAE: 16.5009
+Test Loss (MSE): 639.0059 | Test MAE: 15.0772
+--------------------
+Epoch: 88/500
+Train Loss (MSE): 139.0362 | Train MAE: 16.5203
+Test Loss (MSE): 840.8667 | Test MAE: 16.5725
+--------------------
+Epoch: 89/500
+Train Loss (MSE): 139.2538 | Train MAE: 16.5409
+Test Loss (MSE): 1129.9296 | Test MAE: 18.3048
+--------------------
+Epoch: 90/500
+Train Loss (MSE): 137.4256 | Train MAE: 16.5881
+Test Loss (MSE): 1044.5421 | Test MAE: 18.0203
+--------------------
+Epoch: 91/500
+Train Loss (MSE): 137.3950 | Train MAE: 16.5365
+Test Loss (MSE): 782.8773 | Test MAE: 16.2289
+--------------------
+Epoch: 92/500
+Train Loss (MSE): 136.7066 | Train MAE: 16.5791
+Test Loss (MSE): 641.1650 | Test MAE: 15.1908
+--------------------
+Epoch: 93/500
+Train Loss (MSE): 134.9359 | Train MAE: 16.5147
+Test Loss (MSE): 914.5976 | Test MAE: 16.9321
+--------------------
+Epoch: 94/500
+Train Loss (MSE): 136.2458 | Train MAE: 16.5339
+Test Loss (MSE): 751.2521 | Test MAE: 16.1927
+--------------------
+Epoch: 95/500
+Train Loss (MSE): 134.8182 | Train MAE: 16.5515
+Test Loss (MSE): 747.8442 | Test MAE: 15.7278
+--------------------
+Epoch: 96/500
+Train Loss (MSE): 133.5672 | Train MAE: 16.4793
+Test Loss (MSE): 586.5102 | Test MAE: 14.7225
+--------------------
+Epoch: 97/500
+Train Loss (MSE): 133.6983 | Train MAE: 16.6079
+Test Loss (MSE): 897.5031 | Test MAE: 16.8766
+--------------------
+Epoch: 98/500
+Train Loss (MSE): 134.0328 | Train MAE: 16.5495
+Test Loss (MSE): 980.4685 | Test MAE: 17.2369
+--------------------
+Epoch: 99/500
+Train Loss (MSE): 132.6222 | Train MAE: 16.5720
+Test Loss (MSE): 895.7172 | Test MAE: 16.9731
+--------------------
+Epoch: 100/500
+Train Loss (MSE): 132.9393 | Train MAE: 16.5208
+Test Loss (MSE): 802.0561 | Test MAE: 16.7904
+--------------------
+Epoch: 101/500
+Train Loss (MSE): 131.3818 | Train MAE: 16.5199
+Test Loss (MSE): 910.6785 | Test MAE: 16.9285
+--------------------
+Epoch: 102/500
+Train Loss (MSE): 131.3933 | Train MAE: 16.5313
+Test Loss (MSE): 833.1169 | Test MAE: 16.3602
+--------------------
+Epoch: 103/500
+Train Loss (MSE): 130.0852 | Train MAE: 16.5695
+Test Loss (MSE): 877.7002 | Test MAE: 16.7326
+--------------------
+Epoch: 104/500
+Train Loss (MSE): 128.8076 | Train MAE: 16.5728
+Test Loss (MSE): 917.6528 | Test MAE: 16.5450
+--------------------
+Epoch: 105/500
+Train Loss (MSE): 129.4731 | Train MAE: 16.5710
+Test Loss (MSE): 802.3448 | Test MAE: 16.0898
+--------------------
+Epoch: 106/500
+Train Loss (MSE): 129.2303 | Train MAE: 16.5256
+Test Loss (MSE): 514.9379 | Test MAE: 14.2114
+--------------------
+Epoch: 107/500
+Train Loss (MSE): 129.9543 | Train MAE: 16.6141
+Test Loss (MSE): 840.7901 | Test MAE: 16.1253
+--------------------
+Epoch: 108/500
+Train Loss (MSE): 131.6471 | Train MAE: 16.6605
+Test Loss (MSE): 777.6222 | Test MAE: 15.8732
+--------------------
+Epoch: 109/500
+Train Loss (MSE): 129.6050 | Train MAE: 16.6044
+Test Loss (MSE): 866.0925 | Test MAE: 16.3067
+--------------------
+Epoch: 110/500
+Train Loss (MSE): 127.0582 | Train MAE: 16.5832
+Test Loss (MSE): 855.9361 | Test MAE: 16.2672
+--------------------
+Epoch: 111/500
+Train Loss (MSE): 128.8877 | Train MAE: 16.5610
+Test Loss (MSE): 652.0347 | Test MAE: 14.9294
+--------------------
+Epoch   112: reducing learning rate of group 0 to 6.4000e-05.
+Epoch: 112/500
+Train Loss (MSE): 126.7823 | Train MAE: 16.5254
+Test Loss (MSE): 1254.5687 | Test MAE: 18.9800
+--------------------
+Epoch: 113/500
+Train Loss (MSE): 126.9779 | Train MAE: 16.6050
+Test Loss (MSE): 698.0090 | Test MAE: 15.3954
+--------------------
+Epoch: 114/500
+Train Loss (MSE): 125.4955 | Train MAE: 16.5134
+Test Loss (MSE): 669.0369 | Test MAE: 15.0653
+--------------------
+Epoch: 115/500
+Train Loss (MSE): 124.3380 | Train MAE: 16.5979
+Test Loss (MSE): 948.1926 | Test MAE: 16.7469
+--------------------
+Epoch: 116/500
+Train Loss (MSE): 124.0863 | Train MAE: 16.5789
+Test Loss (MSE): 856.9852 | Test MAE: 16.1358
+--------------------
+Epoch: 117/500
+Train Loss (MSE): 124.9965 | Train MAE: 16.5975
+Test Loss (MSE): 658.5902 | Test MAE: 14.9252
+--------------------
+Epoch: 118/500
+Train Loss (MSE): 125.4266 | Train MAE: 16.5933
+Test Loss (MSE): 1116.4096 | Test MAE: 17.7402
+--------------------
+Epoch: 119/500
+Train Loss (MSE): 124.5175 | Train MAE: 16.5267
+Test Loss (MSE): 777.6592 | Test MAE: 15.6148
+--------------------
+Epoch: 120/500
+Train Loss (MSE): 125.7356 | Train MAE: 16.6438
+Test Loss (MSE): 769.0349 | Test MAE: 15.6799
+--------------------
+Epoch: 121/500
+Train Loss (MSE): 125.1731 | Train MAE: 16.5944
+Test Loss (MSE): 925.0663 | Test MAE: 16.6175
+--------------------
+Epoch: 122/500
+Train Loss (MSE): 124.6859 | Train MAE: 16.5811
+Test Loss (MSE): 736.3919 | Test MAE: 15.5063
+--------------------
+Epoch: 123/500
+Train Loss (MSE): 123.2413 | Train MAE: 16.6001
+Test Loss (MSE): 973.2824 | Test MAE: 16.8831
+--------------------
+Epoch: 124/500
+Train Loss (MSE): 122.7218 | Train MAE: 16.6347
+Test Loss (MSE): 627.9231 | Test MAE: 14.7159
+--------------------
+Epoch: 125/500
+Train Loss (MSE): 122.0605 | Train MAE: 16.6024
+Test Loss (MSE): 1269.7517 | Test MAE: 18.8151
+--------------------
+Epoch: 126/500
+Train Loss (MSE): 122.0746 | Train MAE: 16.6250
+Test Loss (MSE): 594.1120 | Test MAE: 14.5835
+--------------------
+Epoch: 127/500
+Train Loss (MSE): 123.2841 | Train MAE: 16.6509
+Test Loss (MSE): 890.4511 | Test MAE: 16.4141
+--------------------
+Epoch: 128/500
+Train Loss (MSE): 121.3302 | Train MAE: 16.6419
+Test Loss (MSE): 952.8911 | Test MAE: 17.0293
+--------------------
+Epoch: 129/500
+Train Loss (MSE): 123.1773 | Train MAE: 16.6522
+Test Loss (MSE): 906.2566 | Test MAE: 16.5250
+--------------------
+Early stopping triggered at epoch 130
+Saving test statistics 
+
+
+Plots and statistics saved to /home/groups/henderj/rzwang/figures/volume_plots/volume_plot_20250320_160317_74099_db/
+Statistics on TEST set:
+
+Best trials:
+  1. File: scaled_100wpm_POD0000000416_S0000240.wav, MAE: 5.4545
+  2. File: scaled_100wpm_YOU0000000525_S0000214.wav, MAE: 6.5098
+  3. File: scaled_100wpm_POD0000000336_S0000153.wav, MAE: 8.2590
+
+Worst trials:
+  1. File: scaled_100wpm_YOU0000000509_S0000282.wav, MAE: 20.3188
+  2. File: scaled_100wpm_AUD0000000468_S0000842.wav, MAE: 20.7783
+  3. File: scaled_100wpm_AUD0000000468_S0000464.wav, MAE: 21.8112
+
+Mean trial error: 13.7653 ± 3.5897
+Test Pearson r: 0.6163 (p=0.0000)
+Statistics on TRAIN set:
+
+Best trials:
+  1. File: scaled_100wpm_YOU0000000379_S0000191.wav, MAE: 3.5565
+  2. File: scaled_100wpm_YOU0000000267_S0000009.wav, MAE: 5.4552
+  3. File: scaled_100wpm_POD0000000015_S0000131.wav, MAE: 6.0843
+
+Worst trials:
+  1. File: scaled_100wpm_POD0000000352_S0000314.wav, MAE: 40.4003
+  2. File: scaled_100wpm_POD0000000160_S0000103.wav, MAE: 41.1078
+  3. File: scaled_100wpm_YOU0000000315_S0000447.wav, MAE: 40248.6177
+
+Mean trial error: 193.5105 ± 2682.2965
+Train Pearson r: -0.0127 (p=0.0177)

@@ -1,0 +1,54 @@
+running
+Using device: cpu
+Epoch: 1/5
+Train Loss (MSE): 3290.4743 | Train MAE: 48.8625
+Test Loss (MSE): 3776.6826 | Test MAE: 54.8361
+--------------------
+Epoch: 2/5
+Train Loss (MSE): 3069.9930 | Train MAE: 48.1383
+Test Loss (MSE): 5983.0363 | Test MAE: 57.7749
+--------------------
+Epoch: 3/5
+Train Loss (MSE): 2859.2999 | Train MAE: 46.9000
+Test Loss (MSE): 21658.6968 | Test MAE: 62.2462
+--------------------
+Epoch: 4/5
+Train Loss (MSE): 2651.9790 | Train MAE: 45.3277
+Test Loss (MSE): 15727.5161 | Test MAE: 59.4799
+--------------------
+Epoch: 5/5
+Train Loss (MSE): 2439.7743 | Train MAE: 43.5461
+Test Loss (MSE): 62495.0812 | Test MAE: 59.6617
+--------------------
+Saving test statistics 
+
+
+Plots and statistics saved to /home/groups/henderj/rzwang/figures/volume_plots/volume_plot_20250320_155931_78947_db/
+Statistics on TEST set:
+
+Best trials:
+  1. File: scaled_100wpm_POD0000000432_S0000455.wav, MAE: 31.7020
+  2. File: scaled_100wpm_POD0000000240_S0000224.wav, MAE: 32.9596
+  3. File: scaled_100wpm_POD0000000464_S0000178.wav, MAE: 35.9309
+
+Worst trials:
+  1. File: scaled_100wpm_POD0000000240_S0000188.wav, MAE: 63.5217
+  2. File: scaled_100wpm_YOU0000000509_S0000061.wav, MAE: 65.9597
+  3. File: scaled_100wpm_YOU0000000525_S0000211.wav, MAE: 70.8782
+
+Mean trial error: 50.3646 ± 8.5135
+Test Pearson r: 0.1706 (p=0.0000)
+Statistics on TRAIN set:
+
+Best trials:
+  1. File: scaled_100wpm_YOU0000000033_S0000039.wav, MAE: 10.9667
+  2. File: scaled_100wpm_AUD0000001381_S0000431.wav, MAE: 15.1070
+  3. File: scaled_100wpm_POD0000000416_S0000192.wav, MAE: 17.0182
+
+Worst trials:
+  1. File: scaled_100wpm_AUD0000000468_S0000347.wav, MAE: 67.8072
+  2. File: scaled_100wpm_POD0000000160_S0000103.wav, MAE: 68.3527
+  3. File: scaled_100wpm_POD0000000048_S0000061.wav, MAE: 285.8934
+
+Mean trial error: 51.5640 ± 17.9911
+Train Pearson r: 0.0487 (p=0.0000)

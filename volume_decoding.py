@@ -74,7 +74,7 @@ class CNNVolumeDecoder(nn.Module):
         x = x.view(x.size(0), -1)
         return self.fc(x).squeeze()
 
-def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id, decoding_type, units, window_size=5, stride=1, 
+def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id, decoding_type, units, normalized, masked, window_size=5, stride=1, 
                         batch_size=32, n_epochs=10, learning_rate=0.001, train_split=0.8):
     
     num_workers = mp.cpu_count
@@ -86,7 +86,11 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     trial_data = []
     trial_labels = []
     current_idx = 0
-    
+    train_losses = []
+    test_losses = []
+    train_maes = []
+    test_maes = []
+
     for trial in trial_info:
         n_bins = trial['n_bins']
         # Calculate how many windows we'll get from this trial
@@ -147,7 +151,13 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     # model = decoder_class(n_channels=neural_data.shape[1], window_size=window_size)
     model = decoder_class(n_channels=neural_data.shape[1], window_size=window_size).to(device)
     # Use MSE loss instead of CrossEntropyLoss for continuous
-    criterion = nn.MSELoss()
+    # criterion = nn.MSELoss()
+    # NEW: changed to Masked MSE Loss
+    if masked:
+        criterion = MaskedMSELoss().to(device)
+    else:
+        criterion = nn.MSELoss()
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.001) # may want to switch back to Adam (remnant of phoneme decoder)
     # scheduler = torch.optim.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -169,7 +179,12 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
 
             # Forward pass
             outputs = model(batch_data)
-            loss = criterion(outputs, batch_labels)
+            # loss = criterion(outputs, batch_labels)
+            # NEW: updated for Masked MSE Loss:
+            if masked:
+                loss = criterion(outputs, batch_labels, normalized=(normalized == "True"))
+            else:
+                loss = criterion(outputs, batch_labels)
             
             # Backward pass and optimize (syntax from GPT bc it was giving me issues)
             optimizer.zero_grad()
@@ -191,14 +206,39 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
         
         with torch.no_grad():
             for batch_data, batch_labels in test_loader:
+                batch_data = batch_data.to(device)
+                batch_labels = batch_labels.to(device)
                 outputs = model(batch_data)
-                loss = criterion(outputs, batch_labels)
+                if masked:
+                    # NEW: MSE update with mask for silence
+                    loss = criterion(outputs, batch_labels, normalized=(normalized == "True"))
+                else:
+                    loss = criterion(outputs, batch_labels)
+                
+
                 test_loss += loss.item()
-                test_mae += torch.mean(torch.abs(outputs - batch_labels)).item()
-        
+                #previously:
+                # test_mae += torch.mean(torch.abs(outputs - batch_labels)).item()
+                # NEW:
+                if masked:
+                    if normalized == "True":
+                        mask = ~torch.isclose(batch_labels, torch.zeros_like(batch_labels), atol=1e-5)
+                    else:
+                        mask = batch_labels != 0
+                    if mask.sum() > 0:  # Only calculate MAE for non-silence portions
+                        test_mae += torch.mean(torch.abs(outputs[mask] - batch_labels[mask])).item()
+                else:
+                    test_mae += torch.mean(torch.abs(outputs - batch_labels)).item()
+
+
+
         avg_test_loss = test_loss / len(test_loader)
         avg_test_mae = test_mae / len(test_loader)
-        
+        train_losses.append(avg_train_loss)
+        test_losses.append(avg_test_loss)
+        train_maes.append(avg_train_mae)
+        test_maes.append(avg_test_mae)
+
         # Update scheduler
         scheduler.step(avg_test_loss)
         
@@ -327,19 +367,66 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     all_actuals_train = np.concatenate([t['actual'] for t in trial_errors_train])
     pearson_r_train, p_value_train = stats.pearsonr(all_actuals_train, all_predictions_train)
 
-    
+    plot_learning_curves(train_losses, test_losses, train_maes, test_maes, plot_dir, decoding_type)
+
+    # def plot_trial(trial_data, title, filename, decoding_type, units):
+    #     plt.figure(figsize=(12, 6))
+    #     plt.plot(trial_data['actual'], label='Actual', color='blue', alpha=0.6)
+    #     # plt.plot(trial_data['predictions'], label='Predicted', color='red', alpha=0.6)
+    #     if masked: #only plot non-zero predictions
+    #         # Create masked predictions
+    #         if normalized:
+    #             mask = ~np.isclose(trial_data['actual'], np.zeros_like(trial_data['actual']), atol=1e-5)
+    #             # Plot predictions only for non-silence portions
+    #             x_coords = np.arange(len(trial_data['predictions']))
+    #             plt.plot(x_coords[mask], trial_data['predictions'][mask], 
+    #                     label='Predicted', color='red', alpha=0.6)
+    #         else:
+    #             mask = trial_data['actual'] != 0
+    #             # Plot predictions only for non-silence portions
+    #             x_coords = np.arange(len(trial_data['predictions']))
+    #             plt.plot(x_coords[mask], trial_data['predictions'][mask], 
+    #                     label='Predicted', color='red', alpha=0.6)
+    #     else:
+    #         plt.plot(trial_data['predictions'], label='Predicted', color='red', alpha=0.6)
+        
+        
+
+    #     plt.title(f"{title}\nMAE: {trial_data['error']:.4f}\nFile: {trial_data['audio_file']}")
+    #     plt.xlabel('Time (20ms bins)')
+    #     plt.ylabel(f'{decoding_type} {units}')
+    #     plt.legend()
+    #     plt.grid(True, alpha=0.3)
+    #     plt.savefig(os.path.join(plot_dir, filename))
+    #     plt.close()
     def plot_trial(trial_data, title, filename, decoding_type, units):
         plt.figure(figsize=(12, 6))
         plt.plot(trial_data['actual'], label='Actual', color='blue', alpha=0.6)
-        plt.plot(trial_data['predictions'], label='Predicted', color='red', alpha=0.6)
+        
+        if masked: #only plot non-zero predictions
+            # Create masked predictions with NaN values
+            masked_predictions = np.full_like(trial_data['predictions'], np.nan, dtype=float)
+            
+            if normalized:
+                mask = ~np.isclose(trial_data['actual'], np.zeros_like(trial_data['actual']), atol=1e-5)
+            else:
+                mask = trial_data['actual'] != 0
+                
+            # Fill in only the non-silence portions
+            masked_predictions[mask] = trial_data['predictions'][mask]
+            
+            # Plot predictions with gaps (NaN values will create gaps in the line)
+            plt.plot(masked_predictions, label='Predicted', color='red', alpha=0.6)
+        else: #plot everything
+            plt.plot(trial_data['predictions'], label='Predicted', color='red', alpha=0.6)
+
         plt.title(f"{title}\nMAE: {trial_data['error']:.4f}\nFile: {trial_data['audio_file']}")
-        plt.xlabel('Time (100ms bins?)')
+        plt.xlabel('Time (20ms bins)')
         plt.ylabel(f'{decoding_type} {units}')
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.savefig(os.path.join(plot_dir, filename))
         plt.close()
-
     for i, trial in enumerate(best_trials_test):
         plot_trial(
             trial,
@@ -381,7 +468,24 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     for i, trial in enumerate(best_trials_test):
         plt.subplot(2, 3, i+1)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
-        plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        # plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        if masked:
+            # Create masked predictions with NaN values
+            masked_predictions = np.full_like(trial['predictions'], np.nan, dtype=float)
+            
+            if normalized:
+                mask = ~np.isclose(trial['actual'], np.zeros_like(trial['actual']), atol=1e-5)
+            else:
+                mask = trial['actual'] != 0
+                
+            # Fill in only the non-silence portions
+            masked_predictions[mask] = trial['predictions'][mask]
+            
+            # Plot predictions with gaps (NaN values will create gaps in the line)
+            plt.plot(masked_predictions, label='Predicted', color='red', alpha=0.6)
+        else:
+            plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        
         plt.title(f'Best #{i+1}\nMAE: {trial["error"]:.4f} (test set)')
         plt.grid(True, alpha=0.3)
         if i == 0:
@@ -390,7 +494,24 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     for i, trial in enumerate(worst_trials_test):
         plt.subplot(2, 3, i+4)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
-        plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        # plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        if masked:
+            # Create masked predictions with NaN values
+            masked_predictions = np.full_like(trial['predictions'], np.nan, dtype=float)
+            
+            if normalized:
+                mask = ~np.isclose(trial['actual'], np.zeros_like(trial['actual']), atol=1e-5)
+            else:
+                mask = trial['actual'] != 0
+                
+            # Fill in only the non-silence portions
+            masked_predictions[mask] = trial['predictions'][mask]
+            
+            # Plot predictions with gaps (NaN values will create gaps in the line)
+            plt.plot(masked_predictions, label='Predicted', color='red', alpha=0.6)
+        else:
+            plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        
         plt.title(f'Worst #{i+1}\nMAE: {trial["error"]:.4f} (test set)')
         plt.grid(True, alpha=0.3)
 
@@ -404,7 +525,23 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     for i, trial in enumerate(best_trials_train):
         plt.subplot(2, 3, i+1)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
-        plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        # plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        if masked:
+           # Create masked predictions with NaN values
+            masked_predictions = np.full_like(trial['predictions'], np.nan, dtype=float)
+            
+            if normalized:
+                mask = ~np.isclose(trial['actual'], np.zeros_like(trial['actual']), atol=1e-5)
+            else:
+                mask = trial['actual'] != 0
+                
+            # Fill in only the non-silence portions
+            masked_predictions[mask] = trial['predictions'][mask]
+            
+            # Plot predictions with gaps (NaN values will create gaps in the line)
+            plt.plot(masked_predictions, label='Predicted', color='red', alpha=0.6)
+        else:
+            plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
         plt.title(f'Best #{i+1}\nMAE: {trial["error"]:.4f} (train)')
         plt.grid(True, alpha=0.3)
         if i == 0:
@@ -413,7 +550,23 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
     for i, trial in enumerate(worst_trials_train):
         plt.subplot(2, 3, i+4)
         plt.plot(trial['actual'], label='Actual', color='blue', alpha=0.6)
-        plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        # plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
+        if masked:
+            # Create masked predictions with NaN values
+            masked_predictions = np.full_like(trial['predictions'], np.nan, dtype=float)
+            
+            if normalized:
+                mask = ~np.isclose(trial['actual'], np.zeros_like(trial['actual']), atol=1e-5)
+            else:
+                mask = trial['actual'] != 0
+                
+            # Fill in only the non-silence portions
+            masked_predictions[mask] = trial['predictions'][mask]
+            
+            # Plot predictions with gaps (NaN values will create gaps in the line)
+            plt.plot(masked_predictions, label='Predicted', color='red', alpha=0.6)
+        else:
+            plt.plot(trial['predictions'], label='Predicted', color='red', alpha=0.6)
         plt.title(f'Worst #{i+1}\nMAE: {trial["error"]:.4f} (train)')
         plt.grid(True, alpha=0.3)
 
@@ -464,6 +617,12 @@ def train_volume_decoder(neural_data, labels, trial_info, decoder_class, run_id,
         'pearson_p_value_test': p_value_test,
         'pearson_r_train': pearson_r_train,
         'pearson_p_value_train': p_value_train
+    })
+    trial_stats.update({
+        'train_losses': train_losses,
+        'test_losses': test_losses,
+        'train_maes': train_maes,
+        'test_maes': test_maes
     })
 
     with open(os.path.join(plot_dir, 'trial_statistics.json'), 'w') as f:
@@ -565,7 +724,7 @@ def main():
     # units = '(db)'
     # file_tag = 'db'
     data_type = args.type #hz or db
-
+    masked = (args.masked == "True")
     if data_type == 'db':
         decoding_type = 'volume'
         units = '(db)'
@@ -598,11 +757,6 @@ def main():
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
-
-
-
-            
-
         logging.info(f"Starting {decoding_type} decoding training with parameters: {vars(args)}")
 
         os.makedirs(args.output_dir, exist_ok=True)
@@ -619,6 +773,8 @@ def main():
             run_id=run_id,
             decoding_type=decoding_type,
             units=units,
+            normalized=args.normalized,
+            masked=masked,
             window_size=args.window_size,
             stride=args.stride,
             batch_size=args.batch_size,
@@ -637,11 +793,18 @@ def main():
             batch_size=args.batch_size
         )
         
-        # Calculate and log metrics
-        mse = np.mean((predictions - test_labels) ** 2)
-        mae = np.mean(np.abs(predictions - test_labels))
-        r2 = r2_score(test_labels, predictions)
-        pearson_r, p_value = stats.pearsonr(test_labels, predictions)
+
+        if masked:
+            logging.info("We are masked... (for debugging)\n")
+            mse, mae, r2, pearson_r, p_value = calculate_masked_metrics(
+                predictions, test_labels, normalized=(args.normalized == "True"))
+        else:
+            logging.info("We are unmasked... (for debug)\n")
+            # Calculate and log metrics
+            mse = np.mean((predictions - test_labels) ** 2)
+            mae = np.mean(np.abs(predictions - test_labels))
+            r2 = r2_score(test_labels, predictions)
+            pearson_r, p_value = stats.pearsonr(test_labels, predictions)
         
         logging.info(f"Test MSE: {mse:.4f}")
         logging.info(f"Test MAE: {mae:.4f}")
@@ -717,6 +880,7 @@ def parse_args():
     parser.add_argument('--output_dir', type=str, default='results')
     parser.add_argument('--type', type=str, default='hz') #hz or db
     parser.add_argument('--normalized', type=str, default="False")
+    parser.add_argument('--masked', type=str, default="True")
     return parser.parse_args()
 
 if __name__ == "__main__":
